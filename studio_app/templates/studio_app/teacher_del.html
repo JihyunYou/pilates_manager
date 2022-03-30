@@ -1,0 +1,64 @@
+{% extends 'common_app/base.html' %}
+
+{% load bootstrap5 %}
+{% load static %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>강사 관리 <span>- 강사 삭제</span></h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item">사업 관리</li>
+            <li class="breadcrumb-item">강사 관리</li>
+            <li class="breadcrumb-item active">강사 삭제</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-3"></div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <span class="badge border-success border-1 text-danger">
+                        강사 계정 비활성화
+                    </span>
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="card-title">
+                    안내
+                    <span>| 강사 삭제시 관련 정보(수업, 회원 등)에 영향을 미칩니다. 삭제 대신 비활성화를 추천드립니다<br>비활성화된 계정은 로그인 할 수 없습니다</span>
+                </div>
+                <div class="card-title">
+                    <span>강사 삭제는 관리자에게 문의하세요</span>
+                </div>
+                {% if teacher.is_active %}
+                    <h5 style="color:red;">강사 [ {{ teacher.name }} ] 계정을 비활성화 하시겠습니까?</h5>
+                {% else %}
+                    <h5 style="color:red;">강사 [ {{ teacher.name }} ] 계정은 이미 비활성화 되어 있습니다</h5>
+                {% endif %}
+            </div>
+            <div class="card-footer text-end">
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="/teacher/" class="btn btn-secondary">
+                        <i class="fa-solid fa-square-caret-left"> 돌아가기</i>
+                    </a>
+                    <button type="submit" class="btn btn-danger float-right"
+                        {% if not teacher.is_active %}
+                            disabled
+                        {% endif %}
+                    >
+                        <i class="fa-solid fa-user-xmark"> 계정 비활성화</i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+{% load humanize %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>강사 관리</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item">사업 관리</li>
+            <li class="breadcrumb-item active">강사 관리</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="row">
+                <div class="col-6">
+                    고용 강사
+                </div>
+                <div class="col-6 text-end">
+                    <a href="add/" class="btn btn-sm btn-success">강사 추가</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered mt-3">
+                <thead class="text-center">
+                    <tr>
+                        <th>강사</th>
+                        <th>email</th>
+                        <th>회당 강습비</th>
+                        <th>계약 시작일</th>
+                        <th>계약 종료일</th>
+                        <th>상태</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% for teacher in teachers %}
+                        <tr>
+                            <td>{{ teacher.name }}</td>
+                            <td>{{ teacher.email }}</td>
+                            <td class="text-end">{{ teacher.lesson_fee | intcomma }} 원</td>
+                            <td>{{ teacher.employment_start_date | date:"Y.m.d" }}</td>
+                            <td>{{ teacher.employment_end_date | date:"Y.m.d" }}</td>
+                            {% if teacher.is_active %}
+                                <td>활성</td>
+                            {% else %}
+                                <td class="text-danger">비활성</td>
+                            {% endif %}
+                            <td class="text-center">
+                                <a href="{{ teacher.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                <a href="{{ teacher.id }}/del/"><span class="badge bg-danger btn">강사삭제</span></a>
+                                <a onclick="showStudioDetail({{ teacher.id }})"><span class="badge bg-info btn">상세보기</span></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('navLinkBusiness').classList.remove('collapsed');
+    document.getElementById('business-nav').classList.add('show');
+    document.getElementById('navContentTeacher').classList.add('active');
+</script>
+
+{% endblock %}

@@ -16,6 +16,34 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+import common_app.views
+import studio_app.views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # common_app
+    path('', common_app.views.index),
+    path('log-in/', common_app.views.login),
+    path('log-out/', common_app.views.logout),
+    path('permission-warning/', common_app.views.permission_warning),
+    path('access-warning/', common_app.views.access_warning),
+
+    # studio_app
+    path('studio/', studio_app.views.studio_index),
+    path('studio/add/', studio_app.views.studio_add),
+    path('studio/<int:studio_id>/chg/', studio_app.views.studio_chg),
+    path('studio/<int:studio_id>/del/', studio_app.views.studio_del),
+
+    path('teacher/', studio_app.views.teacher_index),
+    path('teacher/add/', studio_app.views.teacher_add),
+    path('teacher/<int:teacher_id>/chg/', studio_app.views.teacher_chg),
+    path('teacher/<int:teacher_id>/del/', studio_app.views.teacher_del),
+
+    path('member/', studio_app.views.member_index),
+
+    path('report/', studio_app.views.report_index),
+
+
+    path('get_teachers_of_selected_studio/', studio_app.views.get_teachers_of_selected_studio),
 ]

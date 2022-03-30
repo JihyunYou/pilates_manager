@@ -1,0 +1,136 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>센터 관리</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item">사업 관리</li>
+            <li class="breadcrumb-item active">센터 관리</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="row">
+                <div class="col-6">
+                    소유 지점
+                </div>
+                <div class="col-6 text-end">
+                    <a href="add/" class="btn btn-sm btn-success">지점 추가</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered mt-3">
+                <thead class="text-center">
+                    <tr>
+                        <th>지점</th>
+                        <th>주소</th>
+                        <th>강사</th>
+                        <th>회원</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for studio in studios %}
+                        <tr>
+                            <td>{{ studio.name }}</td>
+                            <td>{{ studio.address }}</td>
+                            <td class="text-end">{{ studio.teachers.all.count }} 명</td>
+                            <td class="text-end"></td>
+                            <td class="text-center">
+                                <a href="{{ studio.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                <a href="{{ studio.id }}/del/"><span class="badge bg-danger btn">지점삭제</span></a>
+                                <a onclick="showStudioDetail({{ studio.id }})"><span class="badge bg-info btn">상세보기</span></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header pb-2">
+                    <div class="row">
+                        <div class="col-6">
+                            소속 강사
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="/teacher/" class="btn btn-sm btn-success">강사 관리</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table id="teacherListTable" class="table mt-3" data-toggle="table">
+                        <thead class="text-center">
+                            <tr>
+                                <th data-field="name">이름</th>
+                                <th data-field="email">메일</th>
+                                <th data-field="user_type">권한</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="3" class="text-center">지점을 선택해 주세요</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header pb-2">
+                    <div class="row">
+                        <div class="col-6">
+                            소속 회원
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="/member/" class="btn btn-sm btn-success">회원 관리</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table id="memberListTable" class="table mt-3" data-toggle="table">
+                        <thead class="text-center">
+                            <tr>
+                                <th data-field="name">이름</th>
+                                <th data-field="gender">성별</th>
+                                <th data-field="membership_type">회원 타입</th>
+                                <th data-field="membership">결재횟수</th>
+                                <th data-field="membership_remain">잔여횟수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center">지점을 선택해 주세요</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<br><br><br>
+<script src='{% static "studio_app/studio_app.js" %}'></script>
+<script>
+    document.getElementById('navLinkBusiness').classList.remove('collapsed');
+    document.getElementById('business-nav').classList.add('show');
+    document.getElementById('navContentStudio').classList.add('active');
+</script>
+
+{% endblock %}

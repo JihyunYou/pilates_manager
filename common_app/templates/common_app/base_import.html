@@ -1,0 +1,50 @@
+{% load static %}
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--  FullCalendar  -->
+<link href='{% static "fullcalendar/main.css" %}' rel='stylesheet' />
+<script src='{% static "fullcalendar/main.js" %}'></script>
+<script src='{% static "fullcalendar/fullcalendar-columns.js" %}'></script>
+
+<!--  icon 사용을 위한 import  -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<script src="https://kit.fontawesome.com/b8eccbd9b4.js" crossorigin="anonymous"></script>
+
+<!--  Jquery  -->
+<script src="{% static 'js/jquery.js' %}"></script>
+
+<!--  Bootstrap Table  -->
+<link rel="stylesheet" href='{% static "bootstrap-table-master/bootstrap-table.min.css" %}'>
+<script src='{% static "bootstrap-table-master/bootstrap-table.min.js" %}'></script>
+<script src='{% static "bootstrap-table-master/locale/bootstrap-table-ko-KR.min.js" %}'></script>
+<!--  filter control  -->
+<link rel="stylesheet"
+      type="text/css"
+      href='{% static "bootstrap-table-master/extensions/filter-control/bootstrap-table-filter-control.css" %}'>
+<script src='{% static "bootstrap-table-master/extensions/filter-control/bootstrap-table-filter-control.js" %}'></script>
+<!--  table export  -->
+<script src='{% static "bootstrap-table-master/libs/FileSaver/FileSaver.min.js" %}'></script>
+<script src='{% static "bootstrap-table-master/libs/js-xlsx/xlsx.core.min.js" %}'></script>
+<script src='{% static "bootstrap-table-master/extensions/export/bootstrap-table-export.js" %}'></script>
+<script src='{% static "bootstrap-table-master/extensions/export/tableExport.js" %}'></script>
+
+<!--  Overlay  -->
+<script src='{% static "jquery-loading-overlay-2.1.7/loadingoverlay.js" %}'></script>
+<script src='{% static "jquery-loading-overlay-2.1.7/loadingoverlay.js" %}'></script>
+
+<!-- UI 개선: Nice Admin -->
+<!-- Vendor CSS Files -->
+<link href='{% static "niceadmin/assets/vendor/bootstrap/css/bootstrap.min.css" %}' rel="stylesheet">
+<link href='{% static "niceadmin/assets/vendor/bootstrap-icons/bootstrap-icons.css" %}' rel="stylesheet">
+<link href='{% static "niceadmin/assets/vendor/boxicons/css/boxicons.min.css" %}' rel="stylesheet">
+<link href='{% static "niceadmin/assets/vendor/quill/quill.snow.css" %}' rel="stylesheet">
+<link href='{% static "niceadmin/assets/vendor/quill/quill.bubble.css" %}' rel="stylesheet">
+<link href='{% static "niceadmin/assets/vendor/remixicon/remixicon.css" %}' rel="stylesheet">
+<link href='{% static "niceadmin/assets/vendor/simple-datatables/style.css" %}' rel="stylesheet">
+
+<!-- Template Main CSS File -->
+<link href='{% static "niceadmin/assets/css/style.css" %}' rel="stylesheet">
+

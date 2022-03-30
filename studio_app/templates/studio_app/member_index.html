@@ -1,0 +1,24 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>회원 관리</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item">사업 관리</li>
+            <li class="breadcrumb-item active">회원 관리</li>
+        </ol>
+    </nav>
+</div>
+
+<script>
+    document.getElementById('navLinkBusiness').classList.remove('collapsed');
+    document.getElementById('business-nav').classList.add('show');
+    document.getElementById('navContentMember').classList.add('active');
+</script>
+
+{% endblock %}
