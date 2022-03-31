@@ -13,9 +13,10 @@ from django.shortcuts import render, redirect
 from common_app.models import User
 from common_app.utils import permission_required
 from common_app.views import check_permission, permission_warning
-from studio_app.models import Studio
+from studio_app.models import Studio, Member, Membership
 
 
+# -------------------------------------------------------------------------------- 센터(지점)
 # 로그인한 사용자가 대표(user_type == 2) 인 경우만 진입 가능
 # 진입 사용자의 소유 지점들만 출력
 @login_required
@@ -60,6 +61,7 @@ class StudioForm(ModelForm):
             Q(user_type=3, employer=owner.id) | Q(pk=owner.id)
         )
         self.fields['address'].required = False
+        self.fields['teachers'].required = False
 
 
 # 지점 추가
@@ -183,6 +185,7 @@ def get_teachers_of_selected_studio(request):
     return JsonResponse(response_json, safe=False)
 
 
+# -------------------------------------------------------------------------------- 강사
 # 고용 강사 메인화면
 @login_required
 @permission_required
@@ -238,10 +241,6 @@ class TeacherForm(ModelForm):
             # )
         }
 
-    def __init__(self, *args, **kwargs):
-        super(TeacherForm, self).__init__(*args, **kwargs)
-        self.fields['employment_start_date'].widget.attrs.update({'type': 'date'})
-
 
 # 강사 추가 화면
 @login_required
@@ -253,7 +252,6 @@ def teacher_add(request):
     if request.POST:
         teacher_form = TeacherForm(request.POST)
         if teacher_form.is_valid():
-
             email = teacher_form.cleaned_data.get('email')
             name = teacher_form.cleaned_data.get('name')
             password = 'fkdlfql'
@@ -348,20 +346,309 @@ def teacher_del(request, teacher_id):
     )
 
 
+# -------------------------------------------------------------------------------- 회원
 @login_required
 @permission_required
 def member_index(request):
+    context = {}
+
+    members = Member.objects.filter(studio__owner=request.user)
+    context['members'] = members
 
     return render(
         request,
-        'studio_app/member_index.html'
+        'studio_app/member_index.html',
+        context
+    )
+
+
+class MemberForm(ModelForm):
+    class Meta:
+        model = Member
+        fields = [
+            'name', 'studio', 'status'
+        ]
+        labels = {
+            'name': '이름',
+            'studio': '소속지점',
+            'status': '회원권'
+        }
+
+    def __init__(self, *args, **kwargs):
+        owner = kwargs.pop('owner')
+        super(MemberForm, self).__init__(*args, **kwargs)
+        self.fields['studio'].queryset = Studio.objects.filter(owner=owner.id)
+
+
+# 회원 추가 화면
+@login_required
+@permission_required
+def member_add(request):
+    context = {}
+    member_form = MemberForm(owner=request.user)
+
+    if request.POST:
+        member_form = MemberForm(request.POST, owner=request.user)
+        if member_form.is_valid():
+            member = member_form.save(commit=False)
+            member.created_by = request.user
+            member.updated_by = request.user
+            member.save()
+
+            return redirect(member_index)
+
+    context['member_form'] = member_form
+
+    return render(
+        request,
+        'studio_app/member_set.html',
+        context
+    )
+
+
+# 회원 정보 수정 화면
+@login_required
+@permission_required
+def member_chg(request, member_id):
+    context = {}
+
+    try:
+        member = Member.objects.get(pk=member_id)
+
+        # 만약 회원 소속 지점의 대표와 접속한 사람이 다르다면 화면 진입 막기
+        if member.studio.owner != request.user:
+            return redirect('/permission-warning/')
+
+        context['member'] = member
+
+    except ObjectDoesNotExist:
+        # 이미 삭제된(없는) 회원인 경우 잘못된 접근 화면으로 redirect
+        return redirect('/access-warning/')
+
+    member_form = MemberForm(instance=member, owner=request.user)
+
+    if request.POST:
+        member_form = MemberForm(request.POST, instance=member, owner=request.user)
+        if member_form.is_valid():
+            member = member_form.save(commit=False)
+            member.updated_by = request.user
+            member.save()
+
+            return redirect(member_index)
+
+    context['member_form'] = member_form
+
+    return render(
+        request,
+        'studio_app/member_set.html',
+        context
+    )
+
+
+# 회원 삭제 화면
+@login_required
+@permission_required
+def member_del(request, member_id):
+    context = {}
+
+    try:
+        member = Member.objects.get(pk=member_id)
+
+        # 만약 회원 소속 지점의 대표와 접속한 사람이 다르다면 화면 진입 막기
+        if member.studio.owner != request.user:
+            return redirect('/permission-warning/')
+
+        context['member'] = member
+
+    except ObjectDoesNotExist:
+        # 이미 삭제된(없는) 회원인 경우 잘못된 접근 화면으로 redirect
+        return redirect('/access-warning/')
+
+    if 'delete' in request.POST:
+        member.delete()
+        return redirect(member_index)
+    elif 'disable' in request.POST:
+        # 삭제 대신 회원권 만료로 변경
+        member.status = 3
+        member.save()
+        return redirect(member_index)
+
+    return render(
+        request,
+        'studio_app/member_del.html',
+        context
     )
 
 
 @login_required
 @permission_required
-def report_index(request):
+def get_membership_of_selected_member(request):
+    member_id = request.GET.get('member')
+    member = Member.objects.get(pk=member_id)
 
+    data = []
+    for membership in member.membership_set.all():
+        row = {
+            'reg_date': membership.reg_date,
+            'reg_amount': membership.reg_amount,
+            'number_of_lesson': membership.number_of_lesson,
+            'action': '<a href="' + str(member.id) + '/membership/' + str(membership.id) + '/chg/"><span class="badge bg-warning btn">회원권수정</span></a>' +
+                      '<a href="' + str(member.id) + '/membership/' + str(membership.id) + '/del/"><span class="badge bg-danger btn">회원권삭제</span></a> '
+        }
+        data.append(row)
+
+    response_json = json.dumps(data, cls=DjangoJSONEncoder)
+
+    return JsonResponse(response_json, safe=False)
+
+
+# -------------------------------------------------------------------------------- 회원권(결제)
+class MembershipForm(ModelForm):
+    class Meta:
+        model = Membership
+        fields = [
+            'reg_date', 'reg_amount', 'number_of_lesson', 'payment_method'
+        ]
+        labels = {
+            'reg_date': '결제일',
+            'reg_amount': '결제금액',
+            'number_of_lesson': '결제횟수',
+            'payment_method': '결제수단'
+        }
+        widgets = {
+            'reg_date': DateInput(),
+        }
+
+
+# 회원권 등록 화면
+@login_required
+@permission_required
+def membership_add(request, member_id):
+    context = {}
+
+    try:
+        member = Member.objects.get(pk=member_id)
+
+        # 만약 회원 소속 지점의 대표와 접속한 사람이 다르다면 화면 진입 막기
+        if member.studio.owner != request.user:
+            return redirect('/permission-warning/')
+
+        context['member'] = member
+
+    except ObjectDoesNotExist:
+        # 이미 삭제된(없는) 회원인 경우 잘못된 접근 화면으로 redirect
+        return redirect('/access-warning/')
+
+    membership_form = MembershipForm()
+
+    if request.POST:
+        membership_form = MembershipForm(request.POST)
+        if membership_form.is_valid():
+            membership = membership_form.save(commit=False)
+            membership.member = member
+
+            # reg_seq 계산
+            membership.reg_seq = member.membership_set.all().count() + 1
+
+            membership.created_by = request.user
+            membership.updated_by = request.user
+            membership.save()
+
+            return redirect(member_index)
+
+    context['membership_form'] = membership_form
+
+    return render(
+        request,
+        'studio_app/membership_set.html',
+        context
+    )
+
+
+# 회원권 수정 화면
+@login_required
+@permission_required
+def membership_chg(request, member_id, membership_id):
+    context = {}
+
+    try:
+        member = Member.objects.get(pk=member_id)
+
+        # 만약 회원 소속 지점의 대표와 접속한 사람이 다르다면 화면 진입 막기
+        if member.studio.owner != request.user:
+            return redirect('/permission-warning/')
+
+        context['member'] = member
+
+        membership = Membership.objects.get(pk=membership_id)
+        context['membership'] = membership
+
+    except ObjectDoesNotExist:
+        # 이미 삭제된(없는) 회원인 경우 잘못된 접근 화면으로 redirect
+        return redirect('/access-warning/')
+
+    membership_form = MembershipForm(instance=membership)
+
+    if request.POST:
+        membership_form = MembershipForm(request.POST, instance=membership)
+        if membership_form.is_valid():
+            membership = membership_form.save(commit=False)
+            membership.updated_by = request.user
+            membership.save()
+
+            return redirect(member_index)
+
+    context['membership_form'] = membership_form
+
+    return render(
+        request,
+        'studio_app/membership_set.html',
+        context
+    )
+
+
+@login_required
+@permission_required
+def membership_del(request, member_id, membership_id):
+    context = {}
+
+    try:
+        member = Member.objects.get(pk=member_id)
+
+        # 만약 회원 소속 지점의 대표와 접속한 사람이 다르다면 화면 진입 막기
+        if member.studio.owner != request.user:
+            return redirect('/permission-warning/')
+
+        membership = Membership.objects.get(pk=membership_id)
+
+    except ObjectDoesNotExist:
+        # 이미 삭제된(없는) 회원 혹은 회원권인 경우 잘못된 접근 화면으로 redirect
+        return redirect('/access-warning/')
+
+    # 삭제
+    if request.POST:
+        # 삭제하고자 하는 회원권보다 seq가 큰 값들 1씩 줄이기
+        for temp_membership in Membership.objects.filter(member=member, reg_seq__gt=membership.reg_seq):
+            temp_membership.reg_seq = temp_membership.reg_seq - 1
+            temp_membership.save()
+
+        membership.delete()
+        return redirect(member_index)
+
+    context['member'] = member
+    context['membership'] = membership
+
+    return render(
+        request,
+        'studio_app/membership_del.html',
+        context
+    )
+
+
+# -------------------------------------------------------------------------------- 통계(현황)
+@login_required
+@permission_required
+def report_index(request):
     return render(
         request,
         'studio_app/report_index.html'

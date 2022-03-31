@@ -8,7 +8,7 @@ from common_app.models import User
 class CustomUserAdmin(ImportExportMixin, UserAdmin):
     # 화면에 출력되는 컬럼 리스트
     list_display = (
-        'get_user_type_display', 'name', 'email', 'employer', 'is_active', 'is_admin'
+        'id', 'get_user_type_display', 'name', 'email', 'employer', 'is_active', 'is_admin'
     )
 
     # 필터링 옵션 ( User Model의 경우 기본 것과 충돌나는 것이 있어 명시 필요 )

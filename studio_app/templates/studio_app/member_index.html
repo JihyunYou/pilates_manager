@@ -1,6 +1,8 @@
 {% extends 'common_app/base.html' %}
 
 {% load static %}
+{% load humanize %}
+{% load studio_extras %}
 
 {% block main_area %}
 
@@ -15,6 +17,115 @@
     </nav>
 </div>
 
+<section class="section">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="row">
+                <div class="col-6">
+                    소속 회원
+                </div>
+                <div class="col-6 text-end">
+                    <a href="add/" class="btn btn-sm btn-success">회원 추가</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-bordered mt-3">
+                <thead class="text-center">
+                    <tr>
+                        <th>이름</th>
+                        <th>소속지점</th>
+                        <th>회원권</th>
+                        <th>결제금액</th>
+                        <th>결제횟수</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% for member in members %}
+                        <tr>
+                            <td>{{ member.name }}</td>
+                            <td>{{ member.studio.name }}</td>
+                            {% if member.status < 3 %}
+                                <td>{{ member.get_status_display }}</td>
+                            {% else %}
+                                <td class="text-danger">{{ member.get_status_display }}</td>
+                            {% endif %}
+                            <td>{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" }}</td>
+                            <td>{{ member.membership_set.all | get_total_value_of_selected_member:"number_of_lesson" }}</td>
+                            <td class="text-center">
+                                <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                <a href="{{ member.id }}/del/"><span class="badge bg-danger btn">회원삭제</span></a>
+                                <a onclick="showMemberDetail({{ member.id }}, '{{ member.name }}')"><span class="badge bg-info btn">상세보기</span></a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header pb-2">
+                    <div class="row">
+                        <div class="col-6">
+                            <h5 class="card-title p-0 selected-member">
+                                <span> | 회원권 정보</span>
+                            </h5>
+                        </div>
+                        <div class="col-6 text-end">
+                            <a id="selected-member-add-btn" href="#" class="disabled btn btn-sm btn-success">결제 정보 추가</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body table-responsive">
+                    <table id="membershipTable" class="table table-bordered mt-3 text-center">
+                        <thead>
+                            <tr>
+                                <th data-field="reg_date">결제일</th>
+                                <th data-field="reg_amount">결제금액</th>
+                                <th data-field="number_of_lesson">결제횟수</th>
+                                <th data-field="action">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4">회원을 선택해 주세요</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header pb-2">
+                    <h5 class="card-title p-0 selected-member">
+                        <span> | 수강 정보</span>
+                    </h5>
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-bordered mt-3">
+                        <thead class="text-center">
+                            <tr>
+                                <th>이름</th>
+                                <th>상태</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src='{% static "studio_app/studio_app.js" %}'></script>
 <script>
     document.getElementById('navLinkBusiness').classList.remove('collapsed');
     document.getElementById('business-nav').classList.add('show');

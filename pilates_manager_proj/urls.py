@@ -41,6 +41,15 @@ urlpatterns = [
     path('teacher/<int:teacher_id>/del/', studio_app.views.teacher_del),
 
     path('member/', studio_app.views.member_index),
+    path('member/add/', studio_app.views.member_add),
+    path('member/<int:member_id>/chg/', studio_app.views.member_chg),
+    path('member/<int:member_id>/del/', studio_app.views.member_del),
+
+    path('get_membership_of_selected_member/', studio_app.views.get_membership_of_selected_member),
+
+    path('member/<int:member_id>/membership/add/', studio_app.views.membership_add),
+    path('member/<int:member_id>/membership/<int:membership_id>/chg/', studio_app.views.membership_chg),
+    path('member/<int:member_id>/membership/<int:membership_id>/del/', studio_app.views.membership_del),
 
     path('report/', studio_app.views.report_index),
 
