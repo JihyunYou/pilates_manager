@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 def index(request):
     return render(
         request,
-        'common_app/index.html'
+        'common_app/dashboard.html'
     )
 
 

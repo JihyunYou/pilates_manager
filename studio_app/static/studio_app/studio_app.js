@@ -1,21 +1,50 @@
-function showStudioDetail(studio)   {
-    var $table = $('#teacherListTable');
-    $table.bootstrapTable('destroy');
+function showStudioDetail(studio_id, studio_name)   {
+    // 지점 선택시 소속 강사, 소속 회원 출력 부분에 지점 표시
+    var targets = document.getElementsByClassName('selected-studio');
+    for (var i=0; i<targets.length; i++)    {
+        targets[i].firstChild.data = studio_name
+    }
 
+    var $teacherTable = $('#teacherListTable');
+    $teacherTable.bootstrapTable('destroy');
     $.ajax({
         type: 'GET',
         url: '/get_teachers_of_selected_studio/',
         data: {
-            studio: studio
+            studio: studio_id
         },
         dataType: 'json',
         success: function(response) {
             data = JSON.parse(response);
             console.log(data);
 
-            $table.bootstrapTable(
+            $teacherTable.bootstrapTable(
                 {
 //                    data-pagination: ture,
+                    data: data
+                }
+            );
+        },
+        complete: function(data)    {
+
+        }
+    });
+
+    var $memberTable = $('#memberListTable');
+    $memberTable.bootstrapTable('destroy');
+    $.ajax({
+        type: 'GET',
+        url: '/get_members_of_selected_studio/',
+        data: {
+            studio: studio_id
+        },
+        dataType: 'json',
+        success: function(response) {
+            data = JSON.parse(response);
+            console.log(data);
+
+            $memberTable.bootstrapTable(
+                {
                     data: data
                 }
             );

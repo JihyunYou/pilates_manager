@@ -83,6 +83,52 @@ class Member(models.Model):
         return self.name
 
 
+DAY_OF_WEEK = [
+    (1, '월요일'), (2, '화요일'), (3, '수요일'), (4, '목요일'), (5, '금요일'), (6, '토요일'), (7, '일요일'),
+]
+
+
+# 회원별 기본 강습 스케쥴
+class MemberDefaultSchedule(models.Model):
+    # 회원 삭제시 함께 삭제
+    member = models.ForeignKey(
+        Member,
+        on_delete=models.CASCADE
+    )
+    # 요일
+    day_of_week = models.IntegerField(
+        choices=DAY_OF_WEEK,
+        null=True
+    )
+    # 시간
+    lesson_time = models.TimeField(
+        null=True
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='MemberDefaultScheduleCreatedBy',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='MemberDefaultScheduleUpdatedBy',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['member', 'day_of_week', 'lesson_time'],
+                name='unique_member_default_schedule'
+            )
+        ]
+        ordering = ['member', 'day_of_week']
+
+
 PAYMENT_METHOD = [
     (1, '현금(계좌이체)'), (2, '현금(현물)'), (3, '카드')
 ]

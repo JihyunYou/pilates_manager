@@ -31,14 +31,22 @@
 
         </div>
         <div class="card-body table-responsive">
-            <table class="table table-bordered mt-3">
-                <thead class="text-center">
+            <table class="table text-center"
+                   data-toggle="table"
+                   data-filter-control="true"
+                   data-search="true"
+                   data-show-search-clear-button="true"
+                   data-pagination="true"
+                   data-page-list="[10, 25, 50, 100, all]"
+            >
+                <thead>
                     <tr>
-                        <th>이름</th>
-                        <th>소속지점</th>
-                        <th>회원권</th>
-                        <th>결제금액</th>
-                        <th>결제횟수</th>
+                        <th data-sortable="true">이름</th>
+                        <th data-field="studio" data-filter-control="select" data-sortable="true">소속지점</th>
+                        <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
+                        <th data-sortable="true">총 결제금액</th>
+                        <th data-sortable="true">총 결제횟수</th>
+                        <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -52,8 +60,9 @@
                             {% else %}
                                 <td class="text-danger">{{ member.get_status_display }}</td>
                             {% endif %}
-                            <td>{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" }}</td>
-                            <td>{{ member.membership_set.all | get_total_value_of_selected_member:"number_of_lesson" }}</td>
+                            <td class="text-end">{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" | intcomma }} 원</td>
+                            <td class="text-end">{{ member.membership_set.all.count | intcomma }} 회</td>
+                            <td>{{ member | get_default_schedule_of_member }}</td>
                             <td class="text-center">
                                 <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
                                 <a href="{{ member.id }}/del/"><span class="badge bg-danger btn">회원삭제</span></a>
@@ -83,20 +92,23 @@
 
                 </div>
                 <div class="card-body table-responsive">
-                    <table id="membershipTable" class="table table-bordered mt-3 text-center">
+                    <table id="membershipTable" class="table table-bordered text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
                         <thead>
                             <tr>
                                 <th data-field="reg_date">결제일</th>
-                                <th data-field="reg_amount">결제금액</th>
-                                <th data-field="number_of_lesson">결제횟수</th>
+                                <th data-field="reg_amount" data-halign="center" data-align="right">결제금액</th>
+                                <th data-field="payment_method">결제수단</th>
+                                <th data-field="number_of_lesson" data-halign="center" data-align="right">수업횟수</th>
                                 <th data-field="action">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="4">회원을 선택해 주세요</td>
-                            </tr>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -110,7 +122,14 @@
                     </h5>
                 </div>
                 <div class="card-body table-responsive">
-                    <table class="table table-bordered mt-3">
+                    <table class="table table-bordered"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
                         <thead class="text-center">
                             <tr>
                                 <th>이름</th>
@@ -126,10 +145,6 @@
 </section>
 
 <script src='{% static "studio_app/studio_app.js" %}'></script>
-<script>
-    document.getElementById('navLinkBusiness').classList.remove('collapsed');
-    document.getElementById('business-nav').classList.add('show');
-    document.getElementById('navContentMember').classList.add('active');
-</script>
+<script src='{% static "studio_app/selected_member.js" %}'></script>
 
 {% endblock %}

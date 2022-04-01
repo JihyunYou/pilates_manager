@@ -1,6 +1,7 @@
 {% extends 'common_app/base.html' %}
 
 {% load static %}
+{% load studio_extras %}
 
 {% block main_area %}
 
@@ -20,7 +21,10 @@
         <div class="card-header pb-2">
             <div class="row">
                 <div class="col-6">
-                    소유 지점
+                    <h5 class="card-title p-0">
+                        {{ request.user.name }} 대표
+                        <span> | 관리 센터</span>
+                    </h5>
                 </div>
                 <div class="col-6 text-end">
                     <a href="add/" class="btn btn-sm btn-success">지점 추가</a>
@@ -29,13 +33,22 @@
 
         </div>
         <div class="card-body table-responsive">
-            <table class="table table-bordered mt-3">
+            <table class="table table-bordered"
+                   data-toggle="table"
+                   data-search="true"
+                   data-show-search-clear-button="true"
+                   data-pagination="true"
+                   data-page-list="[10, 25, 50, 100, all]"
+            >
                 <thead class="text-center">
                     <tr>
-                        <th>지점</th>
-                        <th>주소</th>
-                        <th>강사</th>
-                        <th>회원</th>
+                        <th data-sortable="true">센터</th>
+                        <th data-sortable="true" class="d-none d-lg-table-cell">주소</th><!-- 모바일에서는 가림 -->
+                        <th data-sortable="true">강사</th>
+                        <th data-sortable="true">활성회원</th>
+                        <th data-sortable="true">정지회원</th>
+                        <th data-sortable="true">만료회원</th>
+                        <th data-sortable="true">전체회원</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -45,11 +58,14 @@
                             <td>{{ studio.name }}</td>
                             <td>{{ studio.address }}</td>
                             <td class="text-end">{{ studio.teachers.all.count }} 명</td>
-                            <td class="text-end"></td>
+                            <td class="text-end text-primary">{{ studio.member_set.all | get_number_of_members_by_status:1 }} 명</td>
+                            <td class="text-end text-warning">{{ studio.member_set.all | get_number_of_members_by_status:2 }} 명</td>
+                            <td class="text-end text-danger">{{ studio.member_set.all | get_number_of_members_by_status:3 }} 명</td>
+                            <td class="text-end text-success">{{ studio.member_set.all.count }} 명</td>
                             <td class="text-center">
-                                <a href="{{ studio.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
-                                <a href="{{ studio.id }}/del/"><span class="badge bg-danger btn">지점삭제</span></a>
-                                <a onclick="showStudioDetail({{ studio.id }})"><span class="badge bg-info btn">상세보기</span></a>
+                                <a href="{{ studio.id }}/chg/"><span class="badge bg-warning btn" >센터수정</span></a>
+                                <a href="{{ studio.id }}/del/"><span class="badge bg-danger btn">센터삭제</span></a>
+                                <a onclick="showStudioDetail({{ studio.id }}, '{{ studio.name }}')"><span class="badge bg-info btn">상세보기</span></a>
                             </td>
                         </tr>
                     {% endfor %}
@@ -64,7 +80,9 @@
                 <div class="card-header pb-2">
                     <div class="row">
                         <div class="col-6">
-                            소속 강사
+                            <h5 class="card-title p-0 selected-studio">
+                                <span> | 소속 강사</span>
+                            </h5>
                         </div>
                         <div class="col-6 text-end">
                             <a href="/teacher/" class="btn btn-sm btn-success">강사 관리</a>
@@ -72,19 +90,21 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <table id="teacherListTable" class="table mt-3" data-toggle="table">
-                        <thead class="text-center">
+                    <table id="teacherListTable" class="table text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
+                        <thead>
                             <tr>
-                                <th data-field="name">이름</th>
-                                <th data-field="email">메일</th>
-                                <th data-field="user_type">권한</th>
+                                <th data-field="name" data-sortable="true">이름</th>
+                                <th data-field="user_type" data-sortable="true">권한</th>
+                                <th data-field="lesson_fee" data-sortable="true" data-halign="center" data-align="right">강습비</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="3" class="text-center">지점을 선택해 주세요</td>
-                            </tr>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -94,7 +114,9 @@
                 <div class="card-header pb-2">
                     <div class="row">
                         <div class="col-6">
-                            소속 회원
+                            <h5 class="card-title p-0 selected-studio">
+                                <span> | 소속 회원</span>
+                            </h5>
                         </div>
                         <div class="col-6 text-end">
                             <a href="/member/" class="btn btn-sm btn-success">회원 관리</a>
@@ -102,21 +124,22 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <table id="memberListTable" class="table mt-3" data-toggle="table">
+                    <table id="memberListTable" class="table text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
                         <thead class="text-center">
                             <tr>
-                                <th data-field="name">이름</th>
-                                <th data-field="gender">성별</th>
-                                <th data-field="membership_type">회원 타입</th>
-                                <th data-field="membership">결제횟수</th>
-                                <th data-field="membership_remain">잔여횟수</th>
+                                <th data-field="name" data-sortable="true">이름</th>
+                                <th data-field="status" data-sortable="true">회원권</th>
+                                <th data-field="sum" data-sortable="true" data-halign="center" data-align="right">총 결제금액</th>
+                                <th data-field="count" data-sortable="true" data-halign="center" data-align="right">총 결제횟수</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="5" class="text-center">지점을 선택해 주세요</td>
-                            </tr>
-                        </tbody>
                     </table>
                 </div>
             </div>
@@ -127,10 +150,6 @@
 
 <br><br><br>
 <script src='{% static "studio_app/studio_app.js" %}'></script>
-<script>
-    document.getElementById('navLinkBusiness').classList.remove('collapsed');
-    document.getElementById('business-nav').classList.add('show');
-    document.getElementById('navContentStudio').classList.add('active');
-</script>
+<script src='{% static "studio_app/selected_studio.js" %}'></script>
 
 {% endblock %}

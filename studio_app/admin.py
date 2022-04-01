@@ -3,7 +3,7 @@ from django.db.models import Q
 from import_export.admin import ImportExportMixin
 
 from common_app.models import User
-from studio_app.models import Studio, Member, Membership
+from studio_app.models import Studio, Member, Membership, MemberDefaultSchedule
 
 
 # 지점 정보 Admin Page 설정
@@ -37,7 +37,7 @@ class StudioAdmin(ImportExportMixin, admin.ModelAdmin):
 class MemberAdmin(ImportExportMixin, admin.ModelAdmin):
     # 화면에 출력되는 컬럼 리스트
     list_display = (
-        'id', 'name', 'studio', 'get_status_display', 'created_by', 'created_at', 'updated_by', 'updated_at'
+        'id', 'name', 'studio', 'get_status_display', 'get_default_schedule', 'created_by', 'created_at', 'updated_by', 'updated_at'
     )
 
     # CHG
@@ -49,6 +49,20 @@ class MemberAdmin(ImportExportMixin, admin.ModelAdmin):
             '작성자', {'fields': ('created_by', 'updated_by')}
         )
     )
+
+    def get_default_schedule(self, obj):
+        return ', '.join(
+            [schedule.get_day_of_week_display() + '-' + str(schedule.lesson_time) for schedule in obj.memberdefaultschedule_set.all()]
+        )
+
+
+class MemberDefaultScheduleAdmin(ImportExportMixin, admin.ModelAdmin):
+    # 화면에 출력되는 컬럼 리스트
+    list_display = (
+        'id', 'member', 'get_day_of_week_display', 'lesson_time', 'created_by', 'created_at', 'updated_by', 'updated_at'
+    )
+
+    pass
 
 
 class MembershipAdmin(ImportExportMixin, admin.ModelAdmin):
@@ -62,4 +76,5 @@ class MembershipAdmin(ImportExportMixin, admin.ModelAdmin):
 
 admin.site.register(Studio, StudioAdmin)
 admin.site.register(Member, MemberAdmin)
+admin.site.register(MemberDefaultSchedule, MemberDefaultScheduleAdmin)
 admin.site.register(Membership, MembershipAdmin)

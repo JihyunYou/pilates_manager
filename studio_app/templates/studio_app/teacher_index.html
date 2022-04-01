@@ -1,6 +1,7 @@
 {% extends 'common_app/base.html' %}
 
 {% load static %}
+{% load studio_extras %}
 {% load humanize %}
 
 {% block main_area %}
@@ -30,15 +31,23 @@
 
         </div>
         <div class="card-body table-responsive">
-            <table class="table table-bordered mt-3">
+            <table class="table table-bordered"
+                   data-toggle="table"
+                   data-filter-control="true"
+                   data-search="true"
+                   data-show-search-clear-button="true"
+                   data-pagination="true"
+                   data-page-list="[10, 25, 50, 100, all]"
+            >
                 <thead class="text-center">
                     <tr>
-                        <th>강사</th>
-                        <th>email</th>
-                        <th>회당 강습비</th>
-                        <th>계약 시작일</th>
-                        <th>계약 종료일</th>
-                        <th>상태</th>
+                        <th data-sortable="true">강사</th>
+                        <th data-sortable="true" class="d-none d-lg-table-cell">email</th><!-- 모바일에서는 가림 -->
+                        <th data-sortable="true">회당 강습비</th>
+                        <th data-sortable="true">강습 지점</th>
+                        <th data-sortable="true" class="d-none d-lg-table-cell">계약 시작일</th><!-- 모바일에서는 가림 -->
+                        <th data-sortable="true" class="d-none d-lg-table-cell">계약 종료일</th><!-- 모바일에서는 가림 -->
+                        <th data-sortable="true">상태</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -48,6 +57,7 @@
                             <td>{{ teacher.name }}</td>
                             <td>{{ teacher.email }}</td>
                             <td class="text-end">{{ teacher.lesson_fee | intcomma }} 원</td>
+                            <td>{{ teacher | get_studios_of_teacher }}</td>
                             <td>{{ teacher.employment_start_date | date:"Y.m.d" }}</td>
                             <td>{{ teacher.employment_end_date | date:"Y.m.d" }}</td>
                             {% if teacher.is_active %}
@@ -66,12 +76,33 @@
             </table>
         </div>
     </div>
+
+    <div class="card">
+        <div class="card-header pb-2">
+            수업 내역
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered text-center"
+                   data-toggle="table"
+                   data-filter-control="true"
+                   data-search="true"
+                   data-show-search-clear-button="true"
+                   data-pagination="true"
+                   data-page-list="[10, 25, 50, 100, all]"
+            >
+                <thead>
+                    <tr>
+                        <th>강습일</th>
+                        <th>강습 지점</th>
+                        <th>회원</th>
+                        <th>출석</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
 </section>
 
-<script>
-    document.getElementById('navLinkBusiness').classList.remove('collapsed');
-    document.getElementById('business-nav').classList.add('show');
-    document.getElementById('navContentTeacher').classList.add('active');
-</script>
+<script src='{% static "studio_app/selected_teacher.js" %}'></script>
 
 {% endblock %}

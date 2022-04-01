@@ -32,7 +32,26 @@
                 {% csrf_token %}
 
                 <div class="card-body mt-4">
+                    <div class="card-title">
+                        회원 정보 설정
+                        <span>| 회원 정보를 입력하세요</span>
+                    </div>
                     {% bootstrap_form member_form layout="horizontal" %}
+
+                    <hr class="style1 mb-0">
+
+                    <div class="row">
+                        <div class="card-title">
+                            기본 수업 일정 설정
+                            <span>| 회원의 기본 수업 일정을 입력하세요</span>
+                        </div>
+                        {{ member_default_schedule_formset.management_form }}
+                        {% for schedule_form in member_default_schedule_formset %}
+                            <div class="col-lg">
+                                {% bootstrap_form schedule_form layout="horizontal" %}
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
 
                 <div class="card-footer text-end">
@@ -48,5 +67,8 @@
         </div>
     </div>
 </div>
+
+<script src='{% static "studio_app/selected_member.js" %}'></script>
+
 
 {% endblock %}

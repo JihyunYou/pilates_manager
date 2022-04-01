@@ -35,7 +35,7 @@
         {% if user.is_authenticated %}
           <li class="nav-item dropdown pe-3">
 
-            <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+            <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown" aria-expanded="false">
               <img src='{% static "img/user_icon.png" %}' alt="Profile" class="rounded-circle">
               <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.name }}</span>
             </a><!-- End Profile Iamge Icon -->
@@ -134,6 +134,12 @@
 
 <!-- Template Main JS File -->
 <script src='{% static "niceadmin/assets/js/main.js" %}'></script>
+
+<!--  Bootstrap Table  -->
+<script src='{% static "bootstrap-table-master/bootstrap-table.min.js" %}'></script>
+<script src='{% static "bootstrap-table-master/locale/bootstrap-table-ko-KR.min.js" %}'></script>
+<!--  Bootstrap Table: filter control  -->
+<script src='{% static "bootstrap-table-master/extensions/filter-control/bootstrap-table-filter-control.js" %}'></script>
 
 </body>
 </html>

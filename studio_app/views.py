@@ -5,15 +5,15 @@ from django import forms
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q
-from django.forms import ModelForm
+from django.db.models import Q, Sum
+from django.forms import ModelForm, inlineformset_factory
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 from common_app.models import User
 from common_app.utils import permission_required
 from common_app.views import check_permission, permission_warning
-from studio_app.models import Studio, Member, Membership
+from studio_app.models import Studio, Member, Membership, MemberDefaultSchedule
 
 
 # -------------------------------------------------------------------------------- 센터(지점)
@@ -165,6 +165,7 @@ def studio_del(request, studio_id):
     )
 
 
+# 센터 메인 화면에서 센터 선택 시 해당 센터의 강사들 반환
 @login_required
 @permission_required
 def get_teachers_of_selected_studio(request):
@@ -175,8 +176,30 @@ def get_teachers_of_selected_studio(request):
     for teacher in teachers:
         row = {
             'name': teacher.name,
-            'email': teacher.email,
             'user_type': teacher.get_user_type_display(),
+            'lesson_fee': '{:,}'.format(teacher.lesson_fee or 0) + ' 원',
+        }
+        data.append(row)
+
+    response_json = json.dumps(data, cls=DjangoJSONEncoder)
+
+    return JsonResponse(response_json, safe=False)
+
+
+# 센터 메인 화면에서 센터 선택 시 해당 샌터의 회원들 반환
+@login_required
+@permission_required
+def get_members_of_selected_studio(request):
+    studio = request.GET.get('studio')
+    members = Member.objects.filter(studio=studio)
+
+    data = []
+    for member in members:
+        row = {
+            'name': member.name,
+            'status': member.get_status_display(),
+            'sum': '{:,}'.format(member.membership_set.all().aggregate(total=Sum('reg_amount')).get('total') or 0) + ' 원',
+            'count': '{:,}'.format(member.membership_set.all().count()) + ' 회',
         }
         data.append(row)
 
@@ -347,21 +370,7 @@ def teacher_del(request, teacher_id):
 
 
 # -------------------------------------------------------------------------------- 회원
-@login_required
-@permission_required
-def member_index(request):
-    context = {}
-
-    members = Member.objects.filter(studio__owner=request.user)
-    context['members'] = members
-
-    return render(
-        request,
-        'studio_app/member_index.html',
-        context
-    )
-
-
+# 회원 폼
 class MemberForm(ModelForm):
     class Meta:
         model = Member
@@ -380,12 +389,57 @@ class MemberForm(ModelForm):
         self.fields['studio'].queryset = Studio.objects.filter(owner=owner.id)
 
 
+class TimeInput(forms.TimeInput):
+    input_type = 'time'
+
+
+# 회원 기본 일정 폼
+class MemberDefaultScheduleForm(ModelForm):
+    class Meta:
+        model = MemberDefaultSchedule
+        fields = [
+            'day_of_week', 'lesson_time'
+        ]
+        labels = {
+            'day_of_week': '요일',
+            'lesson_time': '시간'
+        }
+        widgets = {
+            'lesson_time': TimeInput()
+        }
+
+
+MemberDefaultScheduleFormset = inlineformset_factory(
+        Member,
+        MemberDefaultSchedule,
+        form=MemberDefaultScheduleForm,
+        min_num=0,
+        max_num=2,
+    )
+
+@login_required
+@permission_required
+def member_index(request):
+    context = {}
+
+    members = Member.objects.filter(studio__owner=request.user)
+    context['members'] = members
+
+    return render(
+        request,
+        'studio_app/member_index.html',
+        context
+    )
+
+
 # 회원 추가 화면
 @login_required
 @permission_required
 def member_add(request):
     context = {}
+
     member_form = MemberForm(owner=request.user)
+    member_default_schedule_formset = MemberDefaultScheduleFormset()
 
     if request.POST:
         member_form = MemberForm(request.POST, owner=request.user)
@@ -395,9 +449,14 @@ def member_add(request):
             member.updated_by = request.user
             member.save()
 
-            return redirect(member_index)
+            member_default_schedule_formset = MemberDefaultScheduleFormset(request.POST, instance=member)
+            if member_default_schedule_formset.is_valid():
+                member_default_schedule_formset.save()
+
+                return redirect(member_index)
 
     context['member_form'] = member_form
+    context['member_default_schedule_formset'] = member_default_schedule_formset
 
     return render(
         request,
@@ -426,6 +485,7 @@ def member_chg(request, member_id):
         return redirect('/access-warning/')
 
     member_form = MemberForm(instance=member, owner=request.user)
+    member_default_schedule_formset = MemberDefaultScheduleFormset(instance=member)
 
     if request.POST:
         member_form = MemberForm(request.POST, instance=member, owner=request.user)
@@ -434,9 +494,14 @@ def member_chg(request, member_id):
             member.updated_by = request.user
             member.save()
 
-            return redirect(member_index)
+            member_default_schedule_formset = MemberDefaultScheduleFormset(request.POST, instance=member)
+            if member_default_schedule_formset.is_valid():
+                member_default_schedule_formset.save()
+
+                return redirect(member_index)
 
     context['member_form'] = member_form
+    context['member_default_schedule_formset'] = member_default_schedule_formset
 
     return render(
         request,
@@ -490,8 +555,9 @@ def get_membership_of_selected_member(request):
     for membership in member.membership_set.all():
         row = {
             'reg_date': membership.reg_date,
-            'reg_amount': membership.reg_amount,
-            'number_of_lesson': membership.number_of_lesson,
+            'reg_amount': '{:,}'.format(membership.reg_amount or 0) + ' 원',
+            'payment_method': membership.get_payment_method_display(),
+            'number_of_lesson': '{:,}'.format(membership.number_of_lesson or 0) + ' 회',
             'action': '<a href="' + str(member.id) + '/membership/' + str(membership.id) + '/chg/"><span class="badge bg-warning btn">회원권수정</span></a>' +
                       '<a href="' + str(member.id) + '/membership/' + str(membership.id) + '/del/"><span class="badge bg-danger btn">회원권삭제</span></a> '
         }
