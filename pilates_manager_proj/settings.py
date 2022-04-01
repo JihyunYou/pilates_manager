@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'mathfilters',
     'common_app',
     'studio_app',
+    'dashboard_app',
 ]
 
 MIDDLEWARE = [

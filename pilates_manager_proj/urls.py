@@ -17,13 +17,15 @@ from django.contrib import admin
 from django.urls import path
 
 import common_app.views
+import dashboard_app.views
 import studio_app.views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    path('', dashboard_app.views.index),
+
     # common_app
-    path('', common_app.views.index),
     path('log-in/', common_app.views.login),
     path('log-out/', common_app.views.logout),
     path('permission-warning/', common_app.views.permission_warning),

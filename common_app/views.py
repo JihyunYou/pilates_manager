@@ -3,13 +3,6 @@ from django.contrib.auth import authenticate
 from django.shortcuts import render, redirect
 
 
-def index(request):
-    return render(
-        request,
-        'common_app/dashboard.html'
-    )
-
-
 def login(request):
     print('로그인 창 진입')
     if request.POST:
