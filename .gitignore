@@ -134,6 +134,5 @@ dmypy.json
 # Migration
 migrations/
 
-# Staticfiles
-.staticfiles
+# STATIC ROOT - staticfiles
 staticfiles/
