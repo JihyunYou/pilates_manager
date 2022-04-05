@@ -375,18 +375,23 @@ class MemberForm(ModelForm):
     class Meta:
         model = Member
         fields = [
-            'name', 'studio', 'status'
+            'name', 'studio', 'status', 'teacher'
         ]
         labels = {
             'name': '이름',
             'studio': '소속지점',
-            'status': '회원권'
+            'status': '회원권',
+            'teacher': '담당 강사'
         }
 
     def __init__(self, *args, **kwargs):
         owner = kwargs.pop('owner')
         super(MemberForm, self).__init__(*args, **kwargs)
         self.fields['studio'].queryset = Studio.objects.filter(owner=owner.id)
+        self.fields['teacher'].queryset = User.objects.filter(
+            Q(employer=owner.id) | Q(id=owner.id)
+        )
+        self.fields['teacher'].required = False
 
 
 class TimeInput(forms.TimeInput):
@@ -416,6 +421,7 @@ MemberDefaultScheduleFormset = inlineformset_factory(
         min_num=0,
         max_num=2,
     )
+
 
 @login_required
 @permission_required

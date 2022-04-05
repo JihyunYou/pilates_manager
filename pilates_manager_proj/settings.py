@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'common_app',
     'studio_app',
     'dashboard_app',
+    'lesson_app',
 ]
 
 MIDDLEWARE = [

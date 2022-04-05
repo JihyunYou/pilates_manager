@@ -1,0 +1,70 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+{% load humanize %}
+{% load studio_extras %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>담당 회원 조회</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item">수업 관리</li>
+            <li class="breadcrumb-item active">회원 조회</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="row">
+                <div class="col-6">
+                    담당 회원
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table text-center"
+                   data-toggle="table"
+                   data-filter-control="true"
+                   data-search="true"
+                   data-show-search-clear-button="true"
+                   data-pagination="true"
+                   data-page-list="[10, 25, 50, 100, all]"
+            >
+                <thead>
+                    <tr>
+                        <th data-sortable="true">이름</th>
+                        <th data-field="studio" data-filter-control="select" data-sortable="true">소속지점</th>
+                        <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
+                        <th data-sortable="true">담당 강사</th>
+                        <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    {% for member in members %}
+                        <tr>
+                            <td>{{ member.name }}</td>
+                            <td>{{ member.studio.name }}</td>
+                            {% if member.status < 3 %}
+                                <td>{{ member.get_status_display }}</td>
+                            {% else %}
+                                <td class="text-danger">{{ member.get_status_display }}</td>
+                            {% endif %}
+                            <td>{{ member.teacher }}</td>
+                            <td>{{ member | get_default_schedule_of_member }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<script src='{% static "lesson_app/selected_teaching_member.js" %}'></script>
+
+{% endblock %}

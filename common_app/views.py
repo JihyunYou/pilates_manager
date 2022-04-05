@@ -13,7 +13,7 @@ def login(request):
 
         if user is not None:
             auth.login(request, user)
-            return redirect(index)
+            return redirect('/')
         else:
             print('로그인 실패')
             return render(
@@ -52,7 +52,7 @@ def access_warning(request):
 
 def logout(request):
     auth.logout(request)
-    return redirect(index)
+    return redirect('/')
 
 
 def check_permission(request):

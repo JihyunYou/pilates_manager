@@ -18,6 +18,7 @@ from django.urls import path
 
 import common_app.views
 import dashboard_app.views
+import lesson_app.views
 import studio_app.views
 
 urlpatterns = [
@@ -57,4 +58,16 @@ urlpatterns = [
     path('member/<int:member_id>/membership/<int:membership_id>/del/', studio_app.views.membership_del),
 
     path('report/', studio_app.views.report_index),
+
+    # lesson_app
+    path('teaching_member/', lesson_app.views.member_index),
+
+    path('lesson/', lesson_app.views.lesson_index),
+    path('lesson/add/', lesson_app.views.lesson_add),
+    path('lesson/<int:lesson_id>/chg/', lesson_app.views.lesson_chg),
+    path('lesson/<int:lesson_id>/del/', lesson_app.views.lesson_del),
+
+    path('get_attendance_of_selected_lesson/', lesson_app.views.get_attendance_of_selected_lesson),
+    path('set_attendance/', lesson_app.views.set_attendance),
+
 ]

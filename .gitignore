@@ -133,3 +133,7 @@ dmypy.json
 
 # Migration
 migrations/
+
+# Staticfiles
+.staticfiles
+staticfiles/

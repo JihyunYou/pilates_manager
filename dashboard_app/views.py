@@ -8,7 +8,13 @@ from studio_app.models import Studio
 def index(request):
     context = {}
 
-    studios = Studio.objects.filter(owner=request.user)
+    # 대표인 경우
+    if request.user.user_type == 2:
+        studios = Studio.objects.filter(owner=request.user)
+    # 강사인 경우
+    elif request.user.user_type == 3:
+        studios = request.user.StudioTeachers.all()
+
     context['studios'] = studios
 
     return render(

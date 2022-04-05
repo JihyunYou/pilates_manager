@@ -58,6 +58,13 @@ class Member(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
+    # 담당 강사
+    teacher = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='MemberTeacher',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     # 회원권 상태
     status = models.IntegerField(
         choices=MEMBER_STATUS,

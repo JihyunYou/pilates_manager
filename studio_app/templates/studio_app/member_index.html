@@ -46,6 +46,7 @@
                         <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
                         <th data-sortable="true">총 결제금액</th>
                         <th data-sortable="true">총 결제횟수</th>
+                        <th data-sortable="true">담당 강사</th>
                         <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
                         <th>Action</th>
                     </tr>
@@ -62,6 +63,7 @@
                             {% endif %}
                             <td class="text-end">{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" | intcomma }} 원</td>
                             <td class="text-end">{{ member.membership_set.all.count | intcomma }} 회</td>
+                            <td>{{ member.teacher }}</td>
                             <td>{{ member | get_default_schedule_of_member }}</td>
                             <td class="text-center">
                                 <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>

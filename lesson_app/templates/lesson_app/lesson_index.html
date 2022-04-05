@@ -1,0 +1,105 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+{% load humanize %}
+{% load lesson_extras %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>담당 수업 관리</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item">수업 관리</li>
+            <li class="breadcrumb-item active">수업 관리</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="card">
+        <div class="card-header pb-2">
+            <div class="row">
+                <div class="col-6">
+                    담당 수업
+                </div>
+                <div class="col-6 text-end">
+                    <a href="add/" class="btn btn-sm btn-success">수업 등록</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table text-center"
+                   data-toggle="table"
+                   data-filter-control="true"
+                   data-search="true"
+                   data-show-search-clear-button="true"
+                   data-pagination="true"
+                   data-page-list="[10, 25, 50, 100, all]"
+            >
+                <thead>
+                    <tr>
+                        <th data-sortable="true">수업일자</th>
+                        <th data-sortable="true">수업시간</th>
+                        <th data-sortable="true">수업종류</th>
+                        <th data-sortable="true">수강회원</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lesson in lessons %}
+                        <tr>
+                            <td>{{ lesson.lesson_date }}</td>
+                            <td>{{ lesson.lesson_time }}</td>
+                            <td>{{ lesson.get_lesson_type_display }}</td>
+                            <td>{{ lesson | get_members_of_lesson }}</td>
+                            <td class="text-center">
+                                <a href="{{ lesson.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                <a href="{{ lesson.id }}/del/"><span class="badge bg-danger btn">수업삭제</span></a>
+                                <a onclick="showAttendance({{ lesson.id }}, '{{ lesson.lesson_date }}', '{{ lesson.lesson_time }}')"><span class="badge bg-info btn">상세보기</span></a>
+                            </td>
+                        </tr>
+                        {{ lesson.attendance_set.all }}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title p-0 selected-lesson">
+                        <span> | 출석 정보</span>
+                    </h5>
+                </div>
+                <div class="card-body table-responsive">
+                    <table id="attendanceTable" class="table text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
+                        <thead>
+                            <tr>
+                                <th data-field="member" data-sortable="true">회원</th>
+                                <th data-field="attendance" data-sortable="true">출석 상태</th>
+                                <th data-field="action" data-sortable="true">출석 변경</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src='{% static "lesson_app/selected_lesson.js" %}'></script>
+<script src='{% static "lesson_app/lesson_app.js" %}'></script>
+
+{% endblock %}
