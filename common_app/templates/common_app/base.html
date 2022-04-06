@@ -7,9 +7,6 @@
 {# {% bootstrap_css %} #}
 {# {% bootstrap_javascript %} #}
 
-{# Display django.contrib.messages as Bootstrap alerts #}
-{% bootstrap_messages %}
-
 {% load static %}
 
 <html lang="en">
@@ -106,10 +103,8 @@
   <!-- End Sidebar-->
 
   <main id="main" class="main">
-    {% block alert_area %}
-    {% endblock %}
-
-
+    {# Display django.contrib.messages as Bootstrap alerts #}
+    {% bootstrap_messages %}
     {% block main_area %}
     {% endblock %}
   </main><!-- End #main -->

@@ -51,10 +51,10 @@
                 <tbody>
                     {% for lesson in lessons %}
                         <tr>
-                            <td>{{ lesson.lesson_date }}</td>
-                            <td>{{ lesson.lesson_time }}</td>
+                            <td>{{ lesson.lesson_date | date:"Y-m-d" }}</td>
+                            <td>{{ lesson.lesson_time | date:"H:i" }}</td>
                             <td>{{ lesson.get_lesson_type_display }}</td>
-                            <td>{{ lesson | get_members_of_lesson }}</td>
+                            <td>{{ lesson | get_attendance_info_type2 }}</td>
                             <td class="text-center">
                                 <a href="{{ lesson.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
                                 <a href="{{ lesson.id }}/del/"><span class="badge bg-danger btn">수업삭제</span></a>

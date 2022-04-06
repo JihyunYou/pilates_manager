@@ -15,7 +15,13 @@ def get_total_value_of_selected_member(value, arg):
     ).get('total') or 0
 
 
-# 강사가 속한 지점 반환 (지점, 지점 형태로)
+# 대표가 소유한 지점 반환 (지점, 지점 형태로) [Parameter: User]
+@register.filter
+def get_studios_of_owner(value):
+    return ', '.join([studio.name for studio in value.studio_set.all()])
+
+
+# 강사가 속한 지점 반환 (지점, 지점 형태로) [Parameter: User]
 @register.filter
 def get_studios_of_teacher(value):
     return ', '.join([studio.name for studio in value.StudioTeachers.all()])

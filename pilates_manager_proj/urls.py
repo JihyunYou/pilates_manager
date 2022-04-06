@@ -24,7 +24,18 @@ import studio_app.views
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # Profile
+    path('profile/', common_app.views.profile),
+    path('profile/<int:user_id>/chg/', common_app.views.profile_chg),
+
+    # Dashboard
     path('', dashboard_app.views.index),
+    path('get_dashboard_resources/', dashboard_app.views.get_dashboard_resources),
+    path('get_dashboard_events/', dashboard_app.views.get_dashboard_events),
+
+    path('add_lesson_by_schedule/', lesson_app.views.add_lesson_by_schedule),
+    path('add_weekly_lesson_by_schedule/', lesson_app.views.add_weekly_lesson_by_schedule),
+    path('set_attendance_by_schedule/', lesson_app.views.set_attendance_by_schedule),
 
     # common_app
     path('log-in/', common_app.views.login),
@@ -69,5 +80,4 @@ urlpatterns = [
 
     path('get_attendance_of_selected_lesson/', lesson_app.views.get_attendance_of_selected_lesson),
     path('set_attendance/', lesson_app.views.set_attendance),
-
 ]

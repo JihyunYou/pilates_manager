@@ -53,7 +53,7 @@ class Lesson(models.Model):
                 name='unique_lesson',
             )
         ]
-        ordering = ['-lesson_date']
+        ordering = ['-lesson_date', 'lesson_time']
 
 
 ATTENDANCE_STATUS = [

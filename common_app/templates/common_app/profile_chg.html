@@ -1,0 +1,64 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+{% load bootstrap5 %}
+{% load studio_extras %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>비밀번호 변경</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item"><a href="/">Profile</a></li>
+            <li class="breadcrumb-item active">비밀번호 변경</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6">
+                            내 정보
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="{{ request.user.id }}/chg/" class="btn btn-sm btn-success">내 정보 수정</a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <form method="post">
+                    {{ profile_form.media }}
+                    {% csrf_token %}
+
+                    <div class="card-body mt-4">
+                        {% bootstrap_form profile_form layout="horizontal" %}
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <a href="/studio/" class="btn btn-secondary">
+                            <i class="fa-solid fa-square-caret-left"> 돌아가기</i>
+                        </a>
+                        <button type="submit" class="btn btn-success float-right">
+                            <i class="fa-solid fa-floppy-disk"> 저장</i>
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<br><br><br><br>
+<br><br><br><br>
+<br><br><br><br>
+
+{% endblock %}

@@ -1,15 +1,19 @@
+import datetime
 import json
 
 from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import IntegrityError
 from django.forms import ModelForm, inlineformset_factory
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 
 from common_app.models import User
 from lesson_app.models import Lesson, Attendance
+from lesson_app.templatetags.lesson_extras import get_attendance_info_type1
 from studio_app.models import Member
 
 
@@ -26,6 +30,36 @@ def member_index(request):
         'lesson_app/member_index.html',
         context
     )
+
+
+# -------------------------------------------------------------------------------- 수업 공통 함수
+# 시간 계산은 dummy 일자를 붙여 계산한 후 시간 추출하는 방식 사용
+def cal_end_time(start_time):
+    # 수업 시작 시간에 49분 후를 종료시간으로 설정
+    end_time = datetime.datetime(100, 1, 1, start_time.hour, start_time.minute, start_time.second)
+    end_time = end_time + datetime.timedelta(minutes=49)
+    return end_time.time()
+
+
+# 수업 중복 체크
+# 같은 강사의 수업 중 수업 시작 ~ 종료 시간 사이에 수업이 겹치는 경우 체크
+def check_lesson_schedule(lesson_teacher, lesson_date, lesson_time):
+    current_lessons = Lesson.objects.filter(
+        teacher=lesson_teacher,
+        lesson_date=lesson_date,
+    )
+
+    result = True
+
+    for ex_lesson in current_lessons:
+        print('기존 수업: ' + ex_lesson.lesson_time.strftime("%Y-%m-%d %H:%M:%S") + ' ~ ' + cal_end_time(ex_lesson.lesson_time).strftime("%Y-%m-%d %H:%M:%S"))
+        if ex_lesson.lesson_time < lesson_time < cal_end_time(ex_lesson.lesson_time):
+            result = False
+
+        if ex_lesson.lesson_time < cal_end_time(lesson_time) < cal_end_time(ex_lesson.lesson_time):
+            result = False
+
+    return result
 
 
 # -------------------------------------------------------------------------------- 수업
@@ -108,6 +142,16 @@ def lesson_add(request):
         if lesson_form.is_valid():
             lesson = lesson_form.save(commit=False)
             lesson.teacher = request.user
+
+            if not check_lesson_schedule(lesson.teacher, lesson.lesson_date, lesson.lesson_time):
+                context['lesson_form'] = lesson_form
+                context['error'] = '설정하신 시간에 이미 수업 일정이 존재합니다'
+                return render(
+                    request,
+                    'lesson_app/lesson_set.html',
+                    context
+                )
+
             lesson.created_by = request.user
             lesson.updated_by = request.user
             lesson.save()
@@ -223,25 +267,146 @@ def set_attendance(request):
     attendance_id = request.GET.get('attendance')
     set_status = request.GET.get('status')
 
-    msg = ''
-
     try:
         attendance = Attendance.objects.get(pk=attendance_id)
     except ObjectDoesNotExist:
-        msg = '잘못된 출석 설정입니다.'
+        messages.error(request, '잘못된 입력입니다. 다시 시도해주세요')
+        response = {'result': False}
+        return HttpResponse(json.dumps(response))
 
     attendance.status = set_status
     attendance.save()
 
     msg = ATTENDANCE_STATUS_WITH_COLOR[int(attendance.status) - 1][1] + ' 로 변경되었습니다'
-
-    data = []
-    row = {
-        'msg': msg
-    }
-    data.append(row)
-
-    response_json = json.dumps(data, cls=DjangoJSONEncoder)
-    return JsonResponse(msg,safe=False)
+    messages.success(request, msg)
+    response = {'result': True}
+    return HttpResponse(json.dumps(response))
 
 
+@login_required
+def add_lesson_by_schedule(request):
+    if request.POST:
+        lesson_form = LessonForm(request.POST, user=request.user)
+        if lesson_form.is_valid():
+            print("유니크 제약조건 체크")
+            lesson = lesson_form.save(commit=False)
+            lesson.teacher = request.user
+
+            if not check_lesson_schedule(lesson.teacher, lesson.lesson_date, lesson.lesson_time):
+                response = {
+                    'result': False,
+                    'msg': '설정하신 시간에 이미 수업 일정이 존재합니다'
+                }
+                messages.error(request, '설정하신 시간에 이미 수업 일정이 존재합니다')
+                return HttpResponse(json.dumps(response))
+
+            lesson.created_by = request.user
+            lesson.updated_by = request.user
+
+            try:
+                lesson.save()
+                lesson_form.save_m2m()
+            except IntegrityError:
+                response = {'result': False}
+                messages.error(request, '설정하신 시간에 이미 수업 일정이 존재합니다')
+                return HttpResponse(json.dumps(response))
+
+        else:
+            context = {'lesson_form': lesson_form}
+
+            return render(
+                request,
+                'dashboard_app/add_one_lesson_modal.html',
+                context
+            )
+
+    response = {'result': True,}
+    messages.success(
+        request,
+        '[ ' + lesson.lesson_date.strftime("%Y-%m-%d") + ' ' + lesson.lesson_time.strftime("%H:%M") + ' ] ' + '수업 일정이 등록되었습니다'
+    )
+    return HttpResponse(json.dumps(response))
+    # response_json = json.dumps(response, cls=DjangoJSONEncoder)
+    # return JsonResponse(response_json, safe=False)
+
+
+@login_required
+def add_weekly_lesson_by_schedule(request):
+
+    if request.POST:
+        try:
+            input_date = request.POST.get('input-date')
+            input_date = datetime.datetime.strptime(input_date, '%Y-%m-%d').date()
+            start_date = input_date + datetime.timedelta(days=-1 * input_date.weekday())
+            end_date = start_date + datetime.timedelta(days=5)
+        except:
+            response = {'result': False}
+            messages.error(request, '주간 일정을 생성할 날짜를 제대로 입력해주세요')
+            return HttpResponse(json.dumps(response))
+
+        try:
+            for member in request.user.MemberTeacher.filter(status=1):
+                for schedule in member.memberdefaultschedule_set.all():
+                    lesson_date = start_date + datetime.timedelta(days=schedule.day_of_week - 1)
+
+                    # 겹치는 시간 체크
+                    if not check_lesson_schedule(
+                            request.user, lesson_date, schedule.lesson_time
+                    ):
+                        continue
+
+                    lesson, created = Lesson.objects.get_or_create(
+                        lesson_date=lesson_date,
+                        lesson_time=schedule.lesson_time,
+                        teacher=request.user
+                    )
+
+                    attendance, created = Attendance.objects.get_or_create(
+                        lesson=lesson,
+                        member=member,
+                    )
+        except Exception as e:
+            messages.error(request, e)
+            response = {'result': False}
+            return HttpResponse(json.dumps(response))
+
+    messages.success(
+        request,
+        '[ ' + start_date.strftime("%Y-%m-%d") + ' ~ ' + end_date.strftime("%Y-%m-%d") + ' ] ' + '주간 수업 일정이 등록되었습니다'
+    )
+
+    response = {'result': True}
+    return HttpResponse(json.dumps(response))
+
+
+@login_required
+def set_attendance_by_schedule(request):
+    lesson_id = request.GET.get('lesson')
+    attendance_status = request.GET.get('attendance')
+
+    try:
+        lesson = Lesson.objects.get(pk=lesson_id)
+    except ObjectDoesNotExist:
+        messages.error(request, '잘못된 입력입니다.')
+        response = {'result': False}
+        response_json = json.dumps(response, cls=DjangoJSONEncoder)
+        return JsonResponse(response_json, safe=False)
+
+    if lesson.teacher != request.user:
+        messages.error(request, '담당 수업의 출석만 변경할 수 있습니다')
+        response = {'result': False}
+        response_json = json.dumps(response, cls=DjangoJSONEncoder)
+        return JsonResponse(response_json, safe=False)
+
+    for attendance in lesson.lesson_related_attendance.all():
+        attendance.status = attendance_status
+        attendance.save()
+
+    messages.success(
+        request,
+        '[ ' + lesson.lesson_time.strftime("%H:%M") + ' ] ' + get_attendance_info_type1(lesson) + ' 수업 출석 정보가 변경되었습니다'
+    )
+
+    response = {'result': True}
+    response_json = json.dumps(response, cls=DjangoJSONEncoder)
+    return JsonResponse(response_json, safe=False)

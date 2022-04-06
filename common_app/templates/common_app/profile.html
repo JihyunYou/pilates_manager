@@ -1,0 +1,81 @@
+{% extends 'common_app/base.html' %}
+
+{% load static %}
+{% load bootstrap5 %}
+{% load studio_extras %}
+
+{% block main_area %}
+
+<div class="pagetitle">
+    <h1>Profile</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">메인</a></li>
+            <li class="breadcrumb-item active">Profile</li>
+        </ol>
+    </nav>
+</div>
+
+<h3>안녕하세요 {{ request.user.name }} 님</h3>
+
+{% if messages %}
+	{% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+           {{ message.message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+	{% endfor %}
+{% endif %}
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-2"></div>
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6">
+                            내 정보
+                        </div>
+                        <div class="col-6 text-end">
+                            <a href="{{ request.user.id }}/chg/" class="btn btn-sm btn-success">비밀번호 수정</a>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>이름</th>
+                                <td>{{ request.user.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>계정(E-mail)</th>
+                                <td>{{ request.user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>등급</th>
+                                <td>{{ request.user.get_user_type_display }}</td>
+                            </tr>
+                            <tr>
+                                <th>관리 지점</th>
+                                <td>{{ request.user | get_studios_of_owner }}</td>
+                            </tr>
+                            <tr>
+                                <th>소속 지점</th>
+                                <td>{{ request.user | get_studios_of_teacher }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<br><br><br><br>
+<br><br><br><br>
+<br><br><br><br>
+
+{% endblock %}

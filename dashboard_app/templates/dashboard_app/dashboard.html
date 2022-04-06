@@ -1,8 +1,33 @@
 {% extends 'common_app/base.html' %}
 
 {% load static %}
+{% load lesson_extras %}
+
+{% load bootstrap5 %}
 
 {% block main_area %}
+
+<style type="text/css">
+    #calendar a {color: black;}
+    #calendar .fc-day.fc-day-sat a { color:#0000FF; }    /* 토요일 */
+    #calendar .fc-day-sun a { color:#FF0000; }    /* 일요일 */
+
+    @media(max-width: 767px) {
+        .fc-toolbar.fc-header-toolbar {
+            display: flex;
+            flex-direction: column;
+        }
+            .fc-toolbar.fc-header-toolbar .fc-left {
+            order: 3;
+        }
+            .fc-toolbar.fc-header-toolbar .fc-center {
+            order: 1;
+        }
+            .fc-toolbar.fc-header-toolbar .fc-right {
+            order: 2;
+        }
+    }
+</style>
 
 <div class="pagetitle">
     <h1>Dashboard</h1>
@@ -17,32 +42,7 @@
 <h3>안녕하세요 {{ request.user.name }} 님</h3>
 
 <section class="section dashboard">
-    <div class="row">
-        <div class="col-lg-9">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-4">
-                            <h5 class="card-title">
-                                수업 일정 <span>| Today</span>
-                            </h5>
-                        </div>
-                        <div class="col-lg-8 text-end pt-3">
-                            {% for studio in studios %}
-                                <button class="btn btn-success"
-                                        onclick="showSchedule({{ studio.id }})"
-                                >
-                                    {{ studio.name }}
-                                </button>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <div id="calendar"></div>
-                </div>
-            </div>
-        </div>
-
+    <div class="row mt-3">
         <div class="col-lg-3">
             <div class="card">
                 <div class="card-body">
@@ -51,27 +51,119 @@
                     </h5>
 
                     <div class="activity">
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">12:30</div>
-                            <i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
-                            <div class="activity-content">
-                                이현주 님 <a href="#" class="fw-bold text-dark">수업</a>
+                        {% for lesson in lessons %}
+                            <div class="activity-item d-flex">
+                                <div class="activite-label">{{ lesson.lesson_time | date:"H:i" }}</div>
+                                <i class="bi bi-circle-fill activity-badge {{ lesson | get_attendance_info_type4 }} align-self-start"></i>
+                                <div class="activity-content">
+                                    {{ lesson | get_attendance_info_type3 }}
+                                </div>
                             </div>
-                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="activity-item d-flex">
-                            <div class="activite-label">12:30</div>
-                            <i class="bi bi-circle-fill activity-badge text-success align-self-start"></i>
-                            <div class="activity-content">
-                                이현주 님 <a href="#" class="fw-bold text-dark">수업</a>
-                            </div>
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <h5 class="card-title">
+                                스케쥴표
+                            </h5>
+                        </div>
+                        <div class="col-8 text-end pt-3">
+                            <button class="btn btn-sm btn-success"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#weeklyLessonAddModal"
+                            >
+                                주별 고정 일정 등록
+                            </button>
                         </div>
                     </div>
+
+                    <div id="calendar"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
+<!-- Set Attendance Status Modal -->
+<div
+    class="modal fade"
+    id="attendanceChgModal"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">출석 변경</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div id="attendanceLessonId" style="display:none;"></div>
+
+            <div class="modal-body text-center">
+                {% for status in ATTENDANCE_STATUS_WITH_COLOR %}
+                    <a href="#" onclick="setAttendance({{ status.0 }})"><span class="badge {{ status.2 }} btn" >{{ status.1 }}</span></a>
+                {% endfor %}
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add Weekly Lesson Modal -->
+<div
+    class="modal fade"
+    id="weeklyLessonAddModal"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">주간 수업 일정 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="weeklyLessonForm" method="post">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-3">
+                            <lable for="inputDate" class="col-form-label">일정 생성 주</lable>
+                        </div>
+                        <div class="col-9">
+                            <input type="date" class="form-control" name="input-date">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="submit" class="btn btn-success float-right" onclick="addWeeklyLesson()">
+                        <i class="fas fa-calendar-plus">&nbsp;&nbsp;일정 등록</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add One Lesson Modal -->
+<div id="lessonAddModalParent">
+    {% include 'dashboard_app/add_one_lesson_modal.html' %}
+</div>
+
+{{ request.user.id | json_script:"user_id" }}
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/80x15.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
 

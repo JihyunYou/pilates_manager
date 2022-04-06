@@ -1,0 +1,32 @@
+{% load bootstrap5 %}
+
+<div
+    class="modal fade"
+    id="lessonAddModal"
+    aria-labelledby="exampleModalLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">수업 일정 등록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="oneLessonForm" method="post">
+                <div class="modal-body">
+                    {{ lesson_form.media }}
+
+                    {% csrf_token %}
+                    {% bootstrap_form lesson_form layout="horizontal" %}
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                    <button type="submit" class="btn btn-success float-right" onclick="addLesson()">
+                        <i class="fas fa-calendar-plus">&nbsp;&nbsp;일정 등록</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
