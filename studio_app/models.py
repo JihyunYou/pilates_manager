@@ -1,4 +1,6 @@
 from django.db import models
+
+from common_app.const_info.const_info import LESSON_TYPE, REGISTRATION_TYPE, PAYMENT_METHOD
 from pilates_manager_proj import settings
 
 
@@ -136,17 +138,19 @@ class MemberDefaultSchedule(models.Model):
         ordering = ['member', 'day_of_week']
 
 
-PAYMENT_METHOD = [
-    (1, '현금(계좌이체)'), (2, '현금(현물)'), (3, '카드')
-]
-
-
 class Membership(models.Model):
     member = models.ForeignKey(
         Member,
         on_delete=models.CASCADE
     )
-
+    # 등록 구분
+    reg_type = models.IntegerField(
+        choices=REGISTRATION_TYPE
+    )
+    # 수업 구분
+    lesson_type = models.IntegerField(
+        choices=LESSON_TYPE
+    )
     # 재등록 횟수
     reg_seq = models.IntegerField(null=True)
     # 등록한 수업 횟수

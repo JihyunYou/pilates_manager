@@ -358,6 +358,7 @@ def add_weekly_lesson_by_schedule(request):
                     lesson, created = Lesson.objects.get_or_create(
                         lesson_date=lesson_date,
                         lesson_time=schedule.lesson_time,
+                        studio=member.studio,
                         teacher=request.user
                     )
 

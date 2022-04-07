@@ -9,6 +9,12 @@ from django.shortcuts import render, redirect
 
 from common_app.models import User
 
+@login_required
+def develop_page(request):
+    return render(
+        request,
+        'common_app/develop_page.html'
+    )
 
 def login(request):
     print('로그인 창 진입')

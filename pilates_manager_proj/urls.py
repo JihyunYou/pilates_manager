@@ -57,6 +57,8 @@ urlpatterns = [
     path('teacher/<int:teacher_id>/chg/', studio_app.views.teacher_chg),
     path('teacher/<int:teacher_id>/del/', studio_app.views.teacher_del),
 
+    path('get_lesson_of_selected_teacher/', studio_app.views.get_lesson_of_selected_teacher),
+
     path('member/', studio_app.views.member_index),
     path('member/add/', studio_app.views.member_add),
     path('member/<int:member_id>/chg/', studio_app.views.member_chg),
@@ -69,6 +71,12 @@ urlpatterns = [
     path('member/<int:member_id>/membership/<int:membership_id>/del/', studio_app.views.membership_del),
 
     path('report/', studio_app.views.report_index),
+
+    # 대표 권한 수업 관리
+    path('admin_lesson/', common_app.views.develop_page),
+
+    # F.A.Q
+    path('f_a_q/', common_app.views.develop_page),
 
     # lesson_app
     path('teaching_member/', lesson_app.views.member_index),

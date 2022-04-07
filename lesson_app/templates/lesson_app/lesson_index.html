@@ -41,10 +41,11 @@
             >
                 <thead>
                     <tr>
-                        <th data-sortable="true">수업일자</th>
-                        <th data-sortable="true">수업시간</th>
-                        <th data-sortable="true">수업종류</th>
-                        <th data-sortable="true">수강회원</th>
+                        <th data-field="lesson_date" data-sortable="true" data-filter-control="input">수업일자</th>
+                        <th data-field="lesson_time" data-sortable="true" data-filter-control="input">수업시간</th>
+                        <th data-field="studio" data-sortable="true" data-filter-control="select">수업지점</th>
+                        <th data-field="lesson_type" data-sortable="true" data-filter-control="select">수업종류</th>
+                        <th data-field="member" data-sortable="true" data-filter-control="input">수강회원</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -53,6 +54,7 @@
                         <tr>
                             <td>{{ lesson.lesson_date | date:"Y-m-d" }}</td>
                             <td>{{ lesson.lesson_time | date:"H:i" }}</td>
+                            <td>{{ lesson.studio.name }}</td>
                             <td>{{ lesson.get_lesson_type_display }}</td>
                             <td>{{ lesson | get_attendance_info_type2 }}</td>
                             <td class="text-center">

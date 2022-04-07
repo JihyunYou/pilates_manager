@@ -30,50 +30,187 @@
             </div>
 
         </div>
-        <div class="card-body table-responsive">
-            <table class="table text-center"
-                   data-toggle="table"
-                   data-filter-control="true"
-                   data-search="true"
-                   data-show-search-clear-button="true"
-                   data-pagination="true"
-                   data-page-list="[10, 25, 50, 100, all]"
-            >
-                <thead>
-                    <tr>
-                        <th data-sortable="true">이름</th>
-                        <th data-field="studio" data-filter-control="select" data-sortable="true">소속지점</th>
-                        <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
-                        <th data-sortable="true">총 결제금액</th>
-                        <th data-sortable="true">총 결제횟수</th>
-                        <th data-sortable="true">담당 강사</th>
-                        <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody class="text-center">
-                    {% for member in members %}
-                        <tr>
-                            <td>{{ member.name }}</td>
-                            <td>{{ member.studio.name }}</td>
-                            {% if member.status < 3 %}
-                                <td>{{ member.get_status_display }}</td>
-                            {% else %}
-                                <td class="text-danger">{{ member.get_status_display }}</td>
-                            {% endif %}
-                            <td class="text-end">{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" | intcomma }} 원</td>
-                            <td class="text-end">{{ member.membership_set.all.count | intcomma }} 회</td>
-                            <td>{{ member.teacher }}</td>
-                            <td>{{ member | get_default_schedule_of_member }}</td>
-                            <td class="text-center">
-                                <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
-                                <a href="{{ member.id }}/del/"><span class="badge bg-danger btn">회원삭제</span></a>
-                                <a onclick="showMemberDetail({{ member.id }}, '{{ member.name }}')"><span class="badge bg-info btn">상세보기</span></a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <div class="card-body pt-2">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active"
+                            data-bs-toggle="tab"
+                            data-bs-target="#activeMember"
+                            type="button" role="tab"
+                            aria-controls="activeMember" aria-selected="true"
+                    >
+                        활성 회원
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link"
+                            data-bs-toggle="tab"
+                            data-bs-target="#deactiveMember"
+                            type="button" role="tab"
+                            aria-controls="deactiveMember" aria-selected="true"
+                    >
+                        비활성 회원
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link"
+                            data-bs-toggle="tab"
+                            data-bs-target="#totalMember"
+                            type="button" role="tab"
+                            aria-controls="totalMember" aria-selected="true"
+                    >
+                        전체 회원
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content pt-2" id="myTabContent">
+                <div class="tab-pane fade show active table-responsive"
+                     id="activeMember"
+                     aria-labelledby="activeMember-tab"
+                >
+                    <table class="table text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">이름</th>
+                                <th data-field="studio" data-filter-control="select" data-sortable="true">소속지점</th>
+                                <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
+                                <th data-sortable="true">총 결제금액</th>
+                                <th data-sortable="true">총 결제횟수</th>
+                                <th data-sortable="true">담당 강사</th>
+                                <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            {% for member in active_members %}
+                                <tr>
+                                    <td>{{ member.name }}</td>
+                                    <td>{{ member.studio.name }}</td>
+                                    {% if member.status < 3 %}
+                                        <td>{{ member.get_status_display }}</td>
+                                    {% else %}
+                                        <td class="text-danger">{{ member.get_status_display }}</td>
+                                    {% endif %}
+                                    <td class="text-end">{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" | intcomma }} 원</td>
+                                    <td class="text-end">{{ member.membership_set.all.count | intcomma }} 회</td>
+                                    <td>{{ member.teacher }}</td>
+                                    <td>{{ member | get_default_schedule_of_member }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                        <a href="{{ member.id }}/del/"><span class="badge bg-danger btn">회원삭제</span></a>
+                                        <a onclick="showMemberDetail({{ member.id }}, '{{ member.name }}')"><span class="badge bg-info btn">상세보기</span></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade table-responsive"
+                     id="deactiveMember"
+                     aria-labelledby="deactiveMember-tab"
+                >
+                    <table class="table text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">이름</th>
+                                <th data-field="studio" data-filter-control="select" data-sortable="true">소속지점</th>
+                                <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
+                                <th data-sortable="true">총 결제금액</th>
+                                <th data-sortable="true">총 결제횟수</th>
+                                <th data-sortable="true">담당 강사</th>
+                                <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            {% for member in deactive_members %}
+                                <tr>
+                                    <td>{{ member.name }}</td>
+                                    <td>{{ member.studio.name }}</td>
+                                    {% if member.status < 3 %}
+                                        <td>{{ member.get_status_display }}</td>
+                                    {% else %}
+                                        <td class="text-danger">{{ member.get_status_display }}</td>
+                                    {% endif %}
+                                    <td class="text-end">{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" | intcomma }} 원</td>
+                                    <td class="text-end">{{ member.membership_set.all.count | intcomma }} 회</td>
+                                    <td>{{ member.teacher }}</td>
+                                    <td>{{ member | get_default_schedule_of_member }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                        <a href="{{ member.id }}/del/"><span class="badge bg-danger btn">회원삭제</span></a>
+                                        <a onclick="showMemberDetail({{ member.id }}, '{{ member.name }}')"><span class="badge bg-info btn">상세보기</span></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tab-pane fade table-responsive"
+                     id="totalMember"
+                     aria-labelledby="totalMember-tab"
+                >
+                    <table class="table text-center"
+                           data-toggle="table"
+                           data-filter-control="true"
+                           data-search="true"
+                           data-show-search-clear-button="true"
+                           data-pagination="true"
+                           data-page-list="[10, 25, 50, 100, all]"
+                    >
+                        <thead>
+                            <tr>
+                                <th data-sortable="true">이름</th>
+                                <th data-field="studio" data-filter-control="select" data-sortable="true">소속지점</th>
+                                <th data-field="status" data-filter-control="select" data-sortable="true">회원권</th>
+                                <th data-sortable="true">총 결제금액</th>
+                                <th data-sortable="true">총 결제횟수</th>
+                                <th data-sortable="true">담당 강사</th>
+                                <th data-sortable="true" class="d-none d-lg-table-cell">기본 수업 일정</th><!-- 모바일에서는 가림 -->
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            {% for member in total_members %}
+                                <tr>
+                                    <td>{{ member.name }}</td>
+                                    <td>{{ member.studio.name }}</td>
+                                    {% if member.status < 3 %}
+                                        <td>{{ member.get_status_display }}</td>
+                                    {% else %}
+                                        <td class="text-danger">{{ member.get_status_display }}</td>
+                                    {% endif %}
+                                    <td class="text-end">{{ member.membership_set.all | get_total_value_of_selected_member:"reg_amount" | intcomma }} 원</td>
+                                    <td class="text-end">{{ member.membership_set.all.count | intcomma }} 회</td>
+                                    <td>{{ member.teacher }}</td>
+                                    <td>{{ member | get_default_schedule_of_member }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ member.id }}/chg/"><span class="badge bg-warning btn" >정보수정</span></a>
+                                        <a href="{{ member.id }}/del/"><span class="badge bg-danger btn">회원삭제</span></a>
+                                        <a onclick="showMemberDetail({{ member.id }}, '{{ member.name }}')"><span class="badge bg-info btn">상세보기</span></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 

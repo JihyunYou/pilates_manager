@@ -9,38 +9,42 @@
         </a>
     </li><!-- End Dashboard Nav -->
 
-    <li class="nav-item">
-        <a id="navLinkBusiness" class="nav-link collapsed" data-bs-target="#business-nav" data-bs-toggle="collapse" href="#">
-            <i class="bi bi-bank"></i><span>사업 관리</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="business-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-            <li>
-                <a id="navContentReport" href="/report/">
-                    <i class="bi bi-circle"></i><span>현황 집계</span>
+    {% if user.is_authenticated %}
+        {% if user.user_type < 3 %}
+            <li class="nav-item">
+                <a id="navLinkBusiness" class="nav-link collapsed" data-bs-target="#business-nav" data-bs-toggle="collapse" href="#">
+                    <i class="bi bi-bank"></i><span>사업 관리</span><i class="bi bi-chevron-down ms-auto"></i>
                 </a>
-            </li>
-            <li>
-                <a id="navContentStudio" href="/studio/">
-                    <i class="bi bi-circle"></i><span>센터 관리</span>
-                </a>
-            </li>
-            <li>
-                <a id="navContentTeacher" href="/teacher/">
-                    <i class="bi bi-circle"></i><span>강사 관리</span>
-                </a>
-            </li>
-            <li>
-                <a id="navContentMember" href="/member/">
-                    <i class="bi bi-circle"></i><span>회원 관리</span>
-                </a>
-            </li>
-            <li>
-                <a id="navContentAdminLesson" href="/admin_lesson/">
-                    <i class="bi bi-circle"></i><span>수업 관리</span>
-                </a>
-            </li>
-        </ul>
-    </li><!-- End Components Nav -->
+                <ul id="business-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                    <li>
+                        <a id="navContentReport" href="/report/">
+                            <i class="bi bi-circle"></i><span>현황 집계</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navContentStudio" href="/studio/">
+                            <i class="bi bi-circle"></i><span>센터 관리</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navContentTeacher" href="/teacher/">
+                            <i class="bi bi-circle"></i><span>강사 관리</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navContentMember" href="/member/">
+                            <i class="bi bi-circle"></i><span>회원 관리</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a id="navContentAdminLesson" href="/admin_lesson/">
+                            <i class="bi bi-circle"></i><span>수업 관리</span>
+                        </a>
+                    </li>
+                </ul>
+            </li><!-- End Components Nav -->
+        {% endif %}
+    {% endif %}
 
     <li class="nav-item">
         <a id="navLinkLesson" class="nav-link collapsed" data-bs-target="#lesson-nav" data-bs-toggle="collapse" href="#">
@@ -70,7 +74,7 @@
     </li><!-- End Profile Page Nav -->
 
     <li class="nav-item">
-        <a class="nav-link collapsed" href="pages-faq.html">
+        <a class="nav-link collapsed" href="/f_a_q/">
             <i class="bi bi-question-circle"></i>
             <span>F.A.Q</span>
         </a>

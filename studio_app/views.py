@@ -13,6 +13,7 @@ from django.shortcuts import render, redirect
 from common_app.models import User
 from common_app.utils import permission_required
 from common_app.views import check_permission, permission_warning
+from lesson_app.templatetags.lesson_extras import get_attendance_info_type2
 from studio_app.models import Studio, Member, Membership, MemberDefaultSchedule
 
 
@@ -369,6 +370,26 @@ def teacher_del(request, teacher_id):
     )
 
 
+@login_required
+@permission_required
+def get_lesson_of_selected_teacher(request):
+    teacher_id = request.GET.get('teacher')
+    teacher = User.objects.get(pk=teacher_id)
+
+    data = []
+    for lesson in teacher.lesson_set.all():
+        row = {
+            'lesson_date': lesson.lesson_date.strftime("%Y-%m-%d"),
+            'studio': lesson.studio.name,
+            'member': get_attendance_info_type2(lesson),
+        }
+        data.append(row)
+
+    response_json = json.dumps(data, cls=DjangoJSONEncoder)
+
+    return JsonResponse(response_json, safe=False)
+
+
 # -------------------------------------------------------------------------------- 회원
 # 회원 폼
 class MemberForm(ModelForm):
@@ -428,8 +449,12 @@ MemberDefaultScheduleFormset = inlineformset_factory(
 def member_index(request):
     context = {}
 
-    members = Member.objects.filter(studio__owner=request.user)
-    context['members'] = members
+    active_members = Member.objects.filter(studio__owner=request.user, status=1)
+    deactive_members = Member.objects.filter(studio__owner=request.user, status__gt=1)
+    total_members = Member.objects.filter(studio__owner=request.user)
+    context['active_members'] = active_members
+    context['deactive_members'] = deactive_members
+    context['total_members'] = total_members
 
     return render(
         request,
@@ -579,10 +604,12 @@ class MembershipForm(ModelForm):
     class Meta:
         model = Membership
         fields = [
-            'reg_date', 'reg_amount', 'number_of_lesson', 'payment_method'
+            'reg_date', 'reg_type', 'lesson_type', 'reg_amount', 'number_of_lesson', 'payment_method'
         ]
         labels = {
             'reg_date': '결제일',
+            'reg_type': '결제구분',
+            'lesson_type': '수업구분',
             'reg_amount': '결제금액',
             'number_of_lesson': '결제횟수',
             'payment_method': '결제수단'

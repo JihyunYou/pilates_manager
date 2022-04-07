@@ -1,12 +1,8 @@
 from django.db import models
 
+from common_app.const_info.const_info import LESSON_TYPE
 from pilates_manager_proj import settings
 from studio_app.models import Member, Studio
-
-
-LESSON_TYPE = [
-    (1, '싱글'), (2, '듀엣')
-]
 
 
 class Lesson(models.Model):

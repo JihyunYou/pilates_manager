@@ -55,6 +55,33 @@ function showStudioDetail(studio_id, studio_name)   {
     });
 }
 
+function showTeacherDetail(teacher_id)  {
+    var $table = $('#teacherLessonTable');
+    $table.bootstrapTable('destroy');
+
+    $.ajax({
+        type: 'GET',
+        url: '/get_lesson_of_selected_teacher/',
+        data: {
+            teacher: teacher_id
+        },
+        dataType: 'json',
+        success: function(response) {
+            data = JSON.parse(response);
+            console.log(data);
+
+            $table.bootstrapTable(
+                {
+                    data: data
+                }
+            );
+        },
+        complete: function(data)    {
+
+        }
+    });
+}
+
 function showMemberDetail(member_id, member_name)   {
     var targets = document.getElementsByClassName('selected-member');
     for (var i=0; i<targets.length; i++)    {
