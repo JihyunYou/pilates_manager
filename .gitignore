@@ -136,3 +136,7 @@ migrations/
 
 # STATIC ROOT - staticfiles
 staticfiles/
+
+# 배포용 설정 파일
+.env.prod
+.env.prod.db
