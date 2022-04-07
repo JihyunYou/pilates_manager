@@ -39,8 +39,8 @@ def index(request):
 # 강사인 경우 일하고 있는 모든 지점에 대한 스케쥴
 @login_required
 def get_dashboard_resources(request):
-    # 대표인 경우
-    if request.user.user_type == 2:
+    # 대표 혹은 관리자인 경우
+    if request.user.user_type <= 2:
         studios = Studio.objects.filter(owner=request.user)
     # 강사인 경우
     elif request.user.user_type == 3:
@@ -64,8 +64,8 @@ def get_dashboard_events(request):
     #   수업예정: #198754 / 수업완료: #0d6dfd / 사전취소: #ffc107 / 당일취소: #dc3546 / 홀딩: #0dcaf0
     color_array = ['#198754', '#0d6dfd', '#ffc107', '#dc3546', '#0dcaf0']
 
-    # 대표인 경우
-    if request.user.user_type == 2:
+    # 대표 혹은 관리자인 경우
+    if request.user.user_type <= 2:
         studios = Studio.objects.filter(owner=request.user)
     # 강사인 경우
     elif request.user.user_type == 3:

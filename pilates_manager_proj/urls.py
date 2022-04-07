@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 
@@ -20,6 +21,7 @@ import common_app.views
 import dashboard_app.views
 import lesson_app.views
 import studio_app.views
+from pilates_manager_proj import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -89,3 +91,4 @@ urlpatterns = [
     path('get_attendance_of_selected_lesson/', lesson_app.views.get_attendance_of_selected_lesson),
     path('set_attendance/', lesson_app.views.set_attendance),
 ]
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
