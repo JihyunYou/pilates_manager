@@ -5,18 +5,10 @@ services:
     build: ./nginx
     volumes:
       - static_volume:/usr/src/app/staticfiles
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
     ports:
       - 80:80
-      - 443:443
     depends_on:
       - web
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
   web:
     build: .
 #    command: python manage.py runserver 0.0.0.0:8000
