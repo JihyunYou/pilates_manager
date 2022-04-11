@@ -1,3 +1,35 @@
+function delLesson()    {
+    lesson_id = document.getElementById('attendanceLessonId').textContent;
+
+    $.ajax({
+        type: 'GET',
+        url: '/del_lesson_by_schedule/',
+        data: {
+            lesson: lesson_id
+        },
+        dataType: 'json',
+        success: function(response) {
+            data = JSON.parse(response);
+
+            // 성공
+            if (data.result) {
+//              Button 이 아니라 a tag 이기에 reload 해줌
+                location.reload()
+            }
+            // 실패
+            else {
+                location.reload()
+            }
+        },
+        error: function(xhr, status, error) {
+            alert(error);
+        },
+        complete: function(data)    {
+
+        }
+    });
+}
+
 function setAttendance(attendance)  {
     var calendar = document.getElementById('calendar');
 

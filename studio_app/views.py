@@ -748,7 +748,139 @@ def membership_del(request, member_id, membership_id):
 @login_required
 @permission_required
 def report_index(request):
+    context = {}
+
+    context['months'] = range(1, 13)
+
     return render(
         request,
-        'studio_app/report_index.html'
+        'studio_app/report_index.html',
+        context
     )
+
+
+# 센터 메인 화면에서 센터 선택 시 해당 센터의 강사들 반환
+@login_required
+@permission_required
+def get_year_report(request):
+    year = request.GET.get('year')
+
+    memberships = Membership.objects.filter(
+        member__studio__owner=request.user.id,
+        reg_date__year=year,
+    )
+    data = []
+
+    # Table 용 월 매출 계
+    row = {'id': '매출 총계'}
+    for month in range(1, 13):
+        row[month] = '{:,}'.format(
+            memberships.filter(
+                reg_date__month=month
+            ).aggregate(
+                total=Sum('reg_amount')
+            ).get('total') or 0
+        ) + ' 원'
+    data.append(row)
+
+    # Table 용 월 신규 등록 계
+    row = {'id': '신규 등록 계'}
+    for month in range(1, 13):
+        row[month] = '{:,}'.format(
+            memberships.filter(
+                reg_date__month=month,
+                reg_type=1
+            ).aggregate(
+                total=Sum('reg_amount')
+            ).get('total') or 0
+        ) + ' 원'
+    data.append(row)
+
+    # Table 용 월 신규 등록 수
+    row = {'id': '신규 등록 수'}
+    for month in range(1, 13):
+        row[month] = '{:,}'.format(
+            memberships.filter(
+                reg_date__month=month,
+                reg_type=1
+            ).count()
+        ) + ' 명'
+    data.append(row)
+
+    # Table 용 월 재등록 계
+    row = {'id': '재등록 계'}
+    for month in range(1, 13):
+        row[month] = '{:,}'.format(
+            memberships.filter(
+                reg_date__month=month,
+                reg_type=2
+            ).aggregate(
+                total=Sum('reg_amount')
+            ).get('total') or 0
+        ) + ' 원'
+    data.append(row)
+
+    # Table 용 월 재등록 수
+    row = {'id': '재등록 수'}
+    for month in range(1, 13):
+        row[month] = '{:,}'.format(
+            memberships.filter(
+                reg_date__month=month,
+                reg_type=2
+            ).count()
+        ) + ' 명'
+    data.append(row)
+
+    # Chart 용 월 매출 계
+    row = {}
+    for month in range(1, 13):
+        row[month] = memberships.filter(
+                reg_date__month=month
+            ).aggregate(
+                total=Sum('reg_amount')
+            ).get('total') or 0
+    data.append(row)
+
+    # Chart 용 월 신규 등록 계
+    row = {}
+    for month in range(1, 13):
+        row[month] = memberships.filter(
+            reg_date__month=month,
+            reg_type=1
+        ).aggregate(
+            total=Sum('reg_amount')
+        ).get('total') or 0
+    data.append(row)
+
+    # Chart 용 월 재등록 계
+    row = {}
+    for month in range(1, 13):
+        row[month] = memberships.filter(
+            reg_date__month=month,
+            reg_type=2
+        ).aggregate(
+            total=Sum('reg_amount')
+        ).get('total') or 0
+    data.append(row)
+
+    # Chart 용 월 신규 등록 수
+    row = {}
+    for month in range(1, 13):
+        row[month] = memberships.filter(
+            reg_date__month=month,
+            reg_type=1
+        ).count()
+    data.append(row)
+
+    # Chart 용 월 재등록 수
+    row = {}
+    for month in range(1, 13):
+        row[month] = memberships.filter(
+            reg_date__month=month,
+            reg_type=2
+        ).count()
+    data.append(row)
+
+    response_json = json.dumps(data, cls=DjangoJSONEncoder)
+
+    return JsonResponse(response_json, safe=False)

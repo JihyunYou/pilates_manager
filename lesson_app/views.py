@@ -411,3 +411,34 @@ def set_attendance_by_schedule(request):
     response = {'result': True}
     response_json = json.dumps(response, cls=DjangoJSONEncoder)
     return JsonResponse(response_json, safe=False)
+
+
+@login_required
+def del_lesson_by_schedule(request):
+    lesson_id = request.GET.get('lesson')
+
+    try:
+        lesson = Lesson.objects.get(pk=lesson_id)
+    except ObjectDoesNotExist:
+        messages.error(request, '잘못된 입력입니다.')
+        response = {'result': False}
+        response_json = json.dumps(response, cls=DjangoJSONEncoder)
+        return JsonResponse(response_json, safe=False)
+
+    if lesson.teacher != request.user:
+        messages.error(request, '담당 수업만 삭제할 수 있습니다')
+        response = {'result': False}
+        response_json = json.dumps(response, cls=DjangoJSONEncoder)
+        return JsonResponse(response_json, safe=False)
+
+    message_str = '[ ' + lesson.lesson_date.strftime("%Y-%m-%d") + ' ' + lesson.lesson_time.strftime("%H:%M") + ' ] '
+    lesson.delete()
+
+    messages.success(
+        request,
+        message_str + ' 수업이 삭제되었습니다'
+    )
+
+    response = {'result': True}
+    response_json = json.dumps(response, cls=DjangoJSONEncoder)
+    return JsonResponse(response_json, safe=False)

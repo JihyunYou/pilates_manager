@@ -72,7 +72,9 @@ urlpatterns = [
     path('member/<int:member_id>/membership/<int:membership_id>/chg/', studio_app.views.membership_chg),
     path('member/<int:member_id>/membership/<int:membership_id>/del/', studio_app.views.membership_del),
 
+    # 현황 집계
     path('report/', studio_app.views.report_index),
+    path('get_year_report/', studio_app.views.get_year_report),
 
     # 대표 권한 수업 관리
     path('admin_lesson/', common_app.views.develop_page),
@@ -90,5 +92,6 @@ urlpatterns = [
 
     path('get_attendance_of_selected_lesson/', lesson_app.views.get_attendance_of_selected_lesson),
     path('set_attendance/', lesson_app.views.set_attendance),
+    path('del_lesson_by_schedule/', lesson_app.views.del_lesson_by_schedule),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
