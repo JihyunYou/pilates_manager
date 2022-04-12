@@ -22,7 +22,9 @@ def index(request):
     )
     context['lessons'] = lessons
 
-    lesson_form = LessonForm(user=request.user)
+    studio = request.user.StudioTeachers.first()
+    print(studio.name)
+    lesson_form = LessonForm(user=request.user, initial={'studio': studio})
     context['lesson_form'] = lesson_form
 
     context['ATTENDANCE_STATUS_WITH_COLOR'] = ATTENDANCE_STATUS_WITH_COLOR
@@ -74,7 +76,7 @@ def get_dashboard_events(request):
     resources = []
     for studio in studios:
         for teacher in studio.teachers.all():
-            for lesson in teacher.lesson_set.all():
+            for lesson in teacher.lesson_set.filter(studio=studio):
                 attendance = lesson.lesson_related_attendance.first()
                 row = {
                     'id': str(lesson.id),

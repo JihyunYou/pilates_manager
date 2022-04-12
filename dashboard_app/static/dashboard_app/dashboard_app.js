@@ -1,3 +1,7 @@
+document.addEventListener("DOMContentLoaded", function() {
+    $("#id_members").attr('style', 'height:200px;overflow:scroll;');
+});
+
 function delLesson()    {
     lesson_id = document.getElementById('attendanceLessonId').textContent;
 
